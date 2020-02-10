@@ -51,11 +51,14 @@ def heuristic_distance(state, goal_state):
     for i in range(1, state_size):
         x1, y1 = get__position_of_number(state, i)
         x2, y2 = get__position_of_number(goal_state, i)
-        distance += abs(x1-x2) + abs(y1-y2)
-        if x1 == x2 and y1 == y2:
-            distance += 1
-        # not admissible
-        # distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
+
+        # heuristic 1 admissible
+        # distance += abs(x1-x2) + abs(y1-y2)
+        # if x1 == x2 and y1 == y2:
+        #     distance += 1
+
+        # heuristic 2 not admissible
+        distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
     return distance
 
 
@@ -75,15 +78,19 @@ def heuristic_distance_increase(state, goal_state, move):
     g_x = (next_value - 1) // n
     g_y = (next_value - 1) % n
 
-    curr_in_pos = 1
-    if curr_x == g_x and curr_y == g_y:
-        curr_in_pos = 0
-    next_in_pos = 1
-    if b_x == g_x and b_y == g_y:
-        next_in_pos = 0
+    # heuristic 1 admissible
+    # curr_in_pos = 1
+    # if curr_x == g_x and curr_y == g_y:
+    #     curr_in_pos = 0
+    # next_in_pos = 1
+    # if b_x == g_x and b_y == g_y:
+    #     next_in_pos = 0
+    # next_cost = abs(b_x - g_x) + abs(b_y - g_y) + next_in_pos
+    # curr_cost = abs(curr_x - g_x) + abs(curr_y - g_y) + curr_in_pos
 
-    next_cost = abs(b_x - g_x) + abs(b_y - g_y) + next_in_pos
-    curr_cost = abs(curr_x - g_x) + abs(curr_y - g_y) + curr_in_pos
+    # heuristic 2 not admissible
+    next_cost = pow(b_x - g_x, 2) + pow(b_y - g_y, 2)
+    curr_cost = pow(curr_x - g_x, 2) + pow(curr_y - g_y, 2)
 
     return next_cost - curr_cost
 
