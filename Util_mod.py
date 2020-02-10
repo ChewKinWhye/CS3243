@@ -25,6 +25,23 @@ def get__position_of_number(state, number):
                 return i, ii
 
 
+# https://math.stackexchange.com/questions/293527/how-to-check-if-a-8-puzzle-is-solvable
+def check_solvable(state):
+    n = len(state)
+    inversions = 0
+    inversion_is_odd = 0
+    if n % 2 == 0:
+        blank_row, blank_y = get__position_of_number(state, 0)
+        if blank_row % 2 == 0:
+            inversion_is_odd = 1
+    flat_state = state_to_tuple(state)
+    for i, val_i in enumerate(flat_state):
+        for j in range(i+1, len(flat_state)):
+            if flat_state[j] > val_i:
+                inversions += 1
+    return inversions % 2 == inversion_is_odd
+
+
 def heuristic_distance(state, goal_state):
     ratio = 8 // 4
     distance = 0

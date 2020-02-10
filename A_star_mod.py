@@ -2,7 +2,7 @@ import os
 import sys
 import heapq
 from Node_mod import Node
-from Util_mod import execute_move, state_to_tuple
+from Util_mod import execute_move, state_to_tuple, check_solvable
 import time
 
 
@@ -14,6 +14,8 @@ class Puzzle(object):
         self.actions = list()
 
     def solve(self):
+        if not check_solvable(self.init_state):
+            return ["UNSOLVABLE"]
         Node.set_goal_state(self.goal_state)
         initial_node = Node(self.init_state, moves=())
         frontier = [initial_node]
