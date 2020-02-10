@@ -20,7 +20,14 @@ class Puzzle(object):
         stack.append(init_node)
 
         while stack:
+
+
             cur_node = stack.pop()
+
+            # Testing purpose
+            # print("Stack size: %d"%(len(stack)))
+            # print("Current state:\n")
+            # print(cur_node)
 
             if cur_node.state == IDSNode.goal_state:
                 return cur_node.moves
@@ -47,7 +54,7 @@ class Puzzle(object):
         initial_node = IDSNode(init_state, moves=[])
 
         # Set the limit yourself
-        limit = 25
+        limit = 11
 
         for x in range(1, limit):
             print("Running ids depth %d" %(x))
