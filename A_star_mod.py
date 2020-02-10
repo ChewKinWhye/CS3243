@@ -19,16 +19,21 @@ class Puzzle(object):
         Node.set_goal_state(self.goal_state)
         initial_node = Node(self.init_state, moves=())
         frontier = [initial_node]
-        explored_states = {}
+        explored_states = set()
         while len(frontier) != 0:
             curr_node = heapq.heappop(frontier)
             curr_dist = curr_node.g_n
-            found_dist = explored_states.get(state_to_tuple(curr_node.state))
-            # Needed for optimal solution if heuristic_distance is not consistent
-            if found_dist and found_dist < curr_dist:
+            state_tup = state_to_tuple(curr_node.state)
+            # found_dist = explored_states.get(state_to_tuple(curr_node.state))
+            # # Needed for optimal solution if heuristic_distance is not consistent
+            # if found_dist:  # and found_dist < curr_dist
+            #     continue
+
+            if state_tup in explored_states:
                 continue
             curr_dist += 1
-            explored_states[state_to_tuple(curr_node.state)] = curr_node.g_n
+            # explored_states[state_to_tuple(curr_node.state)] = curr_node.g_n
+            explored_states.add(state_tup)
             moves = curr_node.get_possible_moves()
             # Explore node
             if curr_node.state == goal_state:
@@ -38,8 +43,10 @@ class Puzzle(object):
                 next_state = execute_move(curr_node, move)
                 # Add to frontier
                 next_state_tup = state_to_tuple(next_state)
-                next_found_dist = explored_states.get(next_state_tup)
-                if next_found_dist and next_found_dist < curr_dist:
+                # next_found_dist = explored_states.get(next_state_tup)
+                # if next_found_dist:  # and found_dist < curr_dist
+                #     continue
+                if next_state_tup in explored_states:
                     continue
                 new_moves = curr_node.moves + (move,)
                 next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, goal_state, move)
