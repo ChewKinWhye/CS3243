@@ -119,5 +119,4 @@ def execute_move(curr_state, move):
 def check_valid(init_state, goal_state, moves):
     for move in moves:
         init_state = execute_move(init_state, move)
-        print(init_state)
     return init_state == goal_state
