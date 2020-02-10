@@ -7,12 +7,15 @@ class Node:
     def set_goal_state(cls, goal_state):
         cls.goal_state = goal_state
 
-    def __init__(self, state, moves):
+    def __init__(self, state, moves, h_n=-1):
         self.state = state
         self.puzzle_size = len(state)
         self.moves = moves
         self.g_n = len(moves)
-        self.h_n = heuristic_distance(self.state, self.goal_state)
+        if h_n == -1:
+            self.h_n = heuristic_distance(self.state, self.goal_state)
+        else:
+            self.h_n = h_n
         self.f_n = self.g_n + self.h_n
 
     def get_possible_moves(self):

@@ -43,15 +43,36 @@ def check_solvable(state):
 
 
 def heuristic_distance(state, goal_state):
-    ratio = 8 // 4
     distance = 0
     state_size = pow(len(state), 2)
-    for i in range(state_size):
+    for i in range(1, state_size):
         x1, y1 = get__position_of_number(state, i)
         x2, y2 = get__position_of_number(goal_state, i)
         # not admissible
         distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
     return distance
+
+
+def heuristic_distance_increase(state, goal_state, blank_pos, move):
+    n = len(goal_state)
+    b_x, b_y = blank_pos
+    curr_x, curr_y = (-1, -1)
+    if move == MoveDirection.UP:
+        curr_x, curr_y = (b_x + 1, b_y)
+    elif move == MoveDirection.DOWN:
+        curr_x, curr_y = (b_x - 1, b_y)
+    elif move == MoveDirection.LEFT:
+        curr_x, curr_y = (b_x, b_y + 1)
+    elif move == MoveDirection.RIGHT:
+        curr_x, curr_y = (b_x, b_y - 1)
+    next_value = state[curr_x][curr_y]
+    g_x = (next_value - 1) // n
+    g_y = (next_value - 1) % n
+
+    next_cost = abs(b_x - g_x) + abs(b_y - g_y)
+    curr_cost = abs(curr_x - g_x) + abs(curr_y - g_y)
+
+    return next_cost - curr_cost
 
 
 def execute_move(curr_node, move):
@@ -61,13 +82,13 @@ def execute_move(curr_node, move):
     if move == MoveDirection.UP:
         new_state[x][y] = new_state[x + 1][y]
         new_state[x + 1][y] = 0
-    if move == MoveDirection.DOWN:
+    elif move == MoveDirection.DOWN:
         new_state[x][y] = new_state[x - 1][y]
         new_state[x - 1][y] = 0
-    if move == MoveDirection.LEFT:
+    elif move == MoveDirection.LEFT:
         new_state[x][y] = new_state[x][y + 1]
         new_state[x][y + 1] = 0
-    if move == MoveDirection.RIGHT:
+    elif move == MoveDirection.RIGHT:
         new_state[x][y] = new_state[x][y - 1]
         new_state[x][y - 1] = 0
     return new_state
