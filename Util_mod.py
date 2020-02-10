@@ -37,7 +37,9 @@ def check_solvable(state):
     flat_state = state_to_tuple(state)
     for i, val_i in enumerate(flat_state):
         for j in range(i+1, len(flat_state)):
-            if flat_state[j] > val_i:
+            if flat_state[j] == 0:
+                continue
+            if val_i > flat_state[j]:
                 inversions += 1
     return inversions % 2 == inversion_is_odd
 
@@ -48,14 +50,15 @@ def heuristic_distance(state, goal_state):
     for i in range(1, state_size):
         x1, y1 = get__position_of_number(state, i)
         x2, y2 = get__position_of_number(goal_state, i)
+        distance += abs(x1-x2) + abs(y1-y2)
         # not admissible
-        distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
+        # distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
     return distance
 
 
-def heuristic_distance_increase(state, goal_state, blank_pos, move):
+def heuristic_distance_increase(state, goal_state, move):
     n = len(goal_state)
-    b_x, b_y = blank_pos
+    b_x, b_y = get__position_of_number(state, 0)
     curr_x, curr_y = (-1, -1)
     if move == MoveDirection.UP:
         curr_x, curr_y = (b_x + 1, b_y)

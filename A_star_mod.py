@@ -2,7 +2,7 @@ import os
 import sys
 import heapq
 from Node_mod import Node
-from Util_mod import execute_move, state_to_tuple, check_solvable
+from Util_mod import execute_move, state_to_tuple, check_solvable, heuristic_distance_increase
 import time
 
 
@@ -33,6 +33,7 @@ class Puzzle(object):
             # Explore node
             if curr_node.state == goal_state:
                 return [e.value for e in curr_node.moves]
+            cur_h_n = curr_node.h_n
             for move in moves:
                 next_state = execute_move(curr_node, move)
                 # Add to frontier
@@ -41,7 +42,8 @@ class Puzzle(object):
                 if next_found_dist and next_found_dist < curr_dist:
                     continue
                 new_moves = curr_node.moves + (move,)
-                new_node = Node(next_state, new_moves)
+                next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, goal_state, move)
+                new_node = Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
 
