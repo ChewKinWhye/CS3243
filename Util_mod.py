@@ -95,10 +95,10 @@ def heuristic_distance_increase(state, goal_state, move):
     return next_cost - curr_cost
 
 
-def execute_move(curr_node, move):
+def execute_move(curr_state, move):
     # curr_node = deepcopy(curr_node)
-    x, y = get__position_of_number(curr_node.state, 0)
-    new_state = deepcopy(curr_node.state)
+    x, y = get__position_of_number(curr_state, 0)
+    new_state = deepcopy(curr_state)
     if move == MoveDirection.UP:
         new_state[x][y] = new_state[x + 1][y]
         new_state[x + 1][y] = 0
@@ -114,3 +114,10 @@ def execute_move(curr_node, move):
     return new_state
     # new_moves = curr_node.moves + (move,)
     # return Node.Node(new_state, new_moves)
+
+
+def check_valid(init_state, goal_state, moves):
+    for move in moves:
+        init_state = execute_move(init_state, move)
+        print(init_state)
+    return init_state == goal_state

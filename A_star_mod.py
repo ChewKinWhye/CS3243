@@ -2,7 +2,7 @@ import os
 import sys
 import heapq
 from Node_mod import Node
-from Util_mod import execute_move, state_to_tuple, check_solvable, heuristic_distance_increase
+from Util_mod import execute_move, state_to_tuple, check_solvable, heuristic_distance_increase, check_valid
 import time
 
 
@@ -37,10 +37,12 @@ class Puzzle(object):
             moves = curr_node.get_possible_moves()
             # Explore node
             if curr_node.state == goal_state:
+                print("Is valid?")
+                print(check_valid(self.init_state, goal_state, curr_node.moves))
                 return [e.value for e in curr_node.moves]
             cur_h_n = curr_node.h_n
             for move in moves:
-                next_state = execute_move(curr_node, move)
+                next_state = execute_move(curr_node.state, move)
                 # Add to frontier
                 next_state_tup = state_to_tuple(next_state)
                 # next_found_dist = explored_states.get(next_state_tup)
