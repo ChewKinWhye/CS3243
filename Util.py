@@ -38,6 +38,18 @@ def state_to_tuple(state):
     return tuple(arr)
 
 
+def tuple_to_state(state_tup, n):
+    state = []
+    i = 0
+    for x in range(n):
+        row = []
+        for y in range(n):
+            row.append(state_tup[i])
+            i += 1
+        state.append(row)
+    return state
+
+
 def get__position_of_number(state, number):
     for i, row in enumerate(state):
         for ii, value in enumerate(row):

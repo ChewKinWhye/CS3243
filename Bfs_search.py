@@ -1,5 +1,5 @@
 import sys
-from Util import execute_move, check_valid, opposite_move_dict, get_possible_moves, state_to_tuple
+from Util import execute_move, check_valid, opposite_move_dict, get_possible_moves, state_to_tuple, tuple_to_state
 import time
 
 
@@ -31,9 +31,11 @@ class Puzzle(object):
         return [e.value for e in result]
 
     def solve(self):
+        n = len(self.init_state)
         initial_move = MoveNode(None, None)
-        next_frontier = [(self.init_state, initial_move)]
-        next_visited = {state_to_tuple(self.init_state)}
+        init_tup = state_to_tuple(self.init_state)
+        next_frontier = [(init_tup, initial_move)]
+        next_visited = {init_tup}
 
         cur_depth = 0
         while True:
@@ -44,7 +46,8 @@ class Puzzle(object):
             frontier = next_frontier
             next_frontier = []
             while frontier:
-                cur_state, cur_move_node = frontier.pop()
+                cur_state_tup, cur_move_node = frontier.pop()
+                cur_state = tuple_to_state(cur_state_tup, n)
 
                 prev_move = cur_move_node.move
                 moves = get_possible_moves(cur_state)
@@ -64,7 +67,7 @@ class Puzzle(object):
                         result = self.process_solution(next_move_node)
                         return result
                     next_visited.add(next_state_tup)
-                    next_frontier.append((next_state, next_move_node))
+                    next_frontier.append((next_state_tup, next_move_node))
             if not next_frontier:
                 return ["UNSOLVABLE"]
     # you may add more functions if you think is useful
