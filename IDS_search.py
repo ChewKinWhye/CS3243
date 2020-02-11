@@ -1,7 +1,7 @@
 import os
 import sys
 from IDSNode import IDSNode
-from IDSUtil import execute_move
+from IDSUtil import execute_move, state_to_tuple
 import time
 
 
@@ -16,13 +16,14 @@ class Puzzle(object):
     def dls(self, depth_limit, init_node):
         # Initialization
         stack = []
-        visited = [init_node.state]
+        visited = {state_to_tuple(init_node.state)}
         stack.append(init_node)
 
         while stack:
 
-
             cur_node = stack.pop()
+            if len(cur_node.moves) + 1 > depth_limit:
+                continue
 
             # Testing purpose
             # print("Stack size: %d"%(len(stack)))
@@ -35,14 +36,17 @@ class Puzzle(object):
             if len(cur_node.moves) >= depth_limit:
                 continue
 
-            visited.append(cur_node)
+            state_tup = state_to_tuple(cur_node.state)
+            visited.add(state_tup)
 
             moves = cur_node.get_possible_moves()
 
             for move in moves:
-                next_node = execute_move(cur_node, move)
-                if next_node.state in visited or len(next_node.moves) > depth_limit:
+                next_state = execute_move(cur_node.state, move)
+                next_state_tup = state_to_tuple(next_state)
+                if next_state_tup in visited:
                     continue
+                next_node = IDSNode(next_state, cur_node.moves + (move,))
                 stack.append(next_node)
 
         return ["UNSOLVABLE"]
@@ -51,7 +55,7 @@ class Puzzle(object):
 
     def solve(self):
         IDSNode.set_goal_state(goal_state)
-        initial_node = IDSNode(init_state, moves=[])
+        initial_node = IDSNode(init_state, moves=())
 
         # Set the limit yourself
         limit = 11

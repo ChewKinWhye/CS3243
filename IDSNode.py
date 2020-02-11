@@ -1,4 +1,4 @@
-from IDSUtil import get__position_of_number
+from IDSUtil import get__position_of_number, MoveDirection
 
 
 class IDSNode:
@@ -12,16 +12,16 @@ class IDSNode:
         self.moves = moves
 
     def get_possible_moves(self):
-        y, x = get__position_of_number(self.state, 0)
-        moves = ['UP', 'DOWN', 'LEFT', 'RIGHT']
-        if y == 0:
-            moves.remove('UP')
-        if y + 1 == self.puzzle_size:
-            moves.remove('DOWN')
-        if x == 0:
-            moves.remove('LEFT')
-        if x + 1 == self.puzzle_size:
-            moves.remove('RIGHT')
+        x, y = get__position_of_number(self.state, 0)
+        moves = []
+        if x != 0:
+            moves.append(MoveDirection.DOWN)
+        if x + 1 != self.puzzle_size:
+            moves.append(MoveDirection.UP)
+        if y != 0:
+            moves.append(MoveDirection.RIGHT)
+        if y + 1 != self.puzzle_size:
+            moves.append(MoveDirection.LEFT)
         return moves
 
     def __str__(self):

@@ -1,5 +1,21 @@
 import IDSNode
 from copy import deepcopy
+from enum import Enum
+
+
+class MoveDirection(Enum):
+    UP = "UP"           # 0
+    DOWN = "DOWN"       # 1
+    LEFT = "LEFT"       # 2
+    RIGHT = "RIGHT"     # 3
+
+
+def state_to_tuple(state):
+    arr = []
+    for row in state:
+        for val in row:
+            arr.append(val)
+    return tuple(arr)
 
 
 def get__position_of_number(state, number):
@@ -9,22 +25,20 @@ def get__position_of_number(state, number):
                 return i, ii
 
 
-def execute_move(curr_node, move):
-    curr_node = deepcopy(curr_node)
-    y, x = get__position_of_number(curr_node.state, 0)
-    new_state = curr_node.state
-    if move == "DOWN":
-        new_state[y][x] = new_state[y+1][x]
-        new_state[y+1][x] = 0
-    if move == "UP":
-        new_state[y][x] = new_state[y-1][x]
-        new_state[y-1][x] = 0
-    if move == "RIGHT":
-        new_state[y][x] = new_state[y][x+1]
-        new_state[y][x+1] = 0
-    if move == "LEFT":
-        new_state[y][x] = new_state[y][x-1]
-        new_state[y][x-1] = 0
-    new_moves = curr_node.moves
-    new_moves.append(move)
-    return IDSNode.IDSNode(new_state, new_moves)
+def execute_move(curr_state, move):
+    # curr_node = deepcopy(curr_node)
+    x, y = get__position_of_number(curr_state, 0)
+    new_state = deepcopy(curr_state)
+    if move == MoveDirection.UP:
+        new_state[x][y] = new_state[x + 1][y]
+        new_state[x + 1][y] = 0
+    elif move == MoveDirection.DOWN:
+        new_state[x][y] = new_state[x - 1][y]
+        new_state[x - 1][y] = 0
+    elif move == MoveDirection.LEFT:
+        new_state[x][y] = new_state[x][y + 1]
+        new_state[x][y + 1] = 0
+    elif move == MoveDirection.RIGHT:
+        new_state[x][y] = new_state[x][y - 1]
+        new_state[x][y - 1] = 0
+    return new_state
