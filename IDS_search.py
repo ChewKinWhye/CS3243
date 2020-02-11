@@ -15,35 +15,42 @@ class Puzzle(object):
 
     def dls(self, depth_limit, init_node):
         # Initialization
+        move_stack = []
         stack = [init_node]
 
         while stack:
             cur_node = stack.pop()
+            while cur_node.depth < len(move_stack):
+                move_stack.pop()
+
+            prev_move = cur_node.move
+            move_stack.append(prev_move)
+            cur_depth = len(move_stack)
 
             # Testing purpose
             # print("Stack size: %d"%(len(stack)))
             # print("Current state:\n")
             # print(cur_node)
-            if cur_node.state == self.goal_state:
-                return cur_node.moves
 
-            if len(cur_node.moves) >= depth_limit:
+            if cur_node.state == self.goal_state:
+                return move_stack[1: cur_depth]
+
+            if cur_depth > depth_limit:
                 continue
 
             # state_tup = state_to_tuple(cur_node.state)
             # visited.add(state_tup)
 
             moves = cur_node.get_possible_moves()
-            prev_moves = cur_node.moves
-            if len(prev_moves) > 0:
-                moves.remove(opposite_move_dict[prev_moves[len(prev_moves) - 1]])
+            if prev_move:
+                moves.remove(opposite_move_dict[prev_move])
 
             for move in moves:
                 next_state = execute_move(cur_node.state, move)
                 # next_state_tup = state_to_tuple(next_state)
                 # if next_state_tup in visited:
                 #     continue
-                next_node = IDSNode(next_state, prev_moves + (move,))
+                next_node = IDSNode(next_state, move, cur_depth)
                 stack.append(next_node)
 
         return ["UNSOLVABLE"]
@@ -52,7 +59,7 @@ class Puzzle(object):
 
     def solve(self):
         IDSNode.set_goal_state(goal_state)
-        initial_node = IDSNode(init_state, moves=())
+        initial_node = IDSNode(init_state, None, 0)
 
         # Set the limit yourself
         limit = 30
