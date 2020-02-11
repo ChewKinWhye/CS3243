@@ -56,7 +56,7 @@ def heuristic_distance(state, goal_state):
         # distance += abs(x1-x2) + abs(y1-y2)
 
         # heuristic 2 admissible (misplaced squares)
-        # if x1 == x2 and y1 == y2:
+        # if x1 != x2 and y1 != y2:
         #     distance += 1
 
         # heuristic 3 not admissible (squared dist)
