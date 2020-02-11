@@ -1,4 +1,3 @@
-import Node_mod
 from copy import deepcopy
 from enum import Enum
 
@@ -8,6 +7,27 @@ class MoveDirection(Enum):
     DOWN = "DOWN"       # 1
     LEFT = "LEFT"       # 2
     RIGHT = "RIGHT"     # 3
+
+
+opposite_move_dict = {MoveDirection.UP: MoveDirection.DOWN,
+                      MoveDirection.DOWN: MoveDirection.UP,
+                      MoveDirection.RIGHT: MoveDirection.LEFT,
+                      MoveDirection.LEFT: MoveDirection.RIGHT}
+
+
+def get_possible_moves(state):
+    x, y = get__position_of_number(state, 0)
+    puzzle_size = len(state)
+    moves = []
+    if x != 0:
+        moves.append(MoveDirection.DOWN)
+    if x + 1 != puzzle_size:
+        moves.append(MoveDirection.UP)
+    if y != 0:
+        moves.append(MoveDirection.RIGHT)
+    if y + 1 != puzzle_size:
+        moves.append(MoveDirection.LEFT)
+    return moves
 
 
 def state_to_tuple(state):
