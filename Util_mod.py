@@ -52,12 +52,14 @@ def heuristic_distance(state, goal_state):
         x1, y1 = get__position_of_number(state, i)
         x2, y2 = get__position_of_number(goal_state, i)
 
-        # heuristic 1 admissible
+        # heuristic 1 admissible (manhattan dist)
         # distance += abs(x1-x2) + abs(y1-y2)
+
+        # heuristic 2 admissible (misplaced squares)
         # if x1 == x2 and y1 == y2:
         #     distance += 1
 
-        # heuristic 2 not admissible
+        # heuristic 3 not admissible (squared dist)
         distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
     return distance
 
@@ -78,17 +80,19 @@ def heuristic_distance_increase(state, goal_state, move):
     g_x = (next_value - 1) // n
     g_y = (next_value - 1) % n
 
-    # heuristic 1 admissible
-    # curr_in_pos = 1
-    # if curr_x == g_x and curr_y == g_y:
-    #     curr_in_pos = 0
-    # next_in_pos = 1
-    # if b_x == g_x and b_y == g_y:
-    #     next_in_pos = 0
-    # next_cost = abs(b_x - g_x) + abs(b_y - g_y) + next_in_pos
-    # curr_cost = abs(curr_x - g_x) + abs(curr_y - g_y) + curr_in_pos
+    # heuristic 1 admissible (manhattan dist)
+    # next_cost = abs(b_x - g_x) + abs(b_y - g_y)
+    # curr_cost = abs(curr_x - g_x) + abs(curr_y - g_y)
 
-    # heuristic 2 not admissible
+    # heuristic 2 admissible (misplaced squares)
+    # curr_cost = 1
+    # if curr_x == g_x and curr_y == g_y:
+    #     curr_cost = 0
+    # next_cost = 1
+    # if b_x == g_x and b_y == g_y:
+    #     next_cost = 0
+
+    # heuristic 3 not admissible (squared dist)
     next_cost = pow(b_x - g_x, 2) + pow(b_y - g_y, 2)
     curr_cost = pow(curr_x - g_x, 2) + pow(curr_y - g_y, 2)
 
@@ -96,7 +100,6 @@ def heuristic_distance_increase(state, goal_state, move):
 
 
 def execute_move(curr_state, move):
-    # curr_node = deepcopy(curr_node)
     x, y = get__position_of_number(curr_state, 0)
     new_state = deepcopy(curr_state)
     if move == MoveDirection.UP:
