@@ -1,7 +1,7 @@
 import os
 import sys
 from IDSNode import IDSNode
-from IDSUtil import execute_move, state_to_tuple
+from IDSUtil import execute_move, state_to_tuple, check_valid
 import time
 
 
@@ -70,6 +70,8 @@ class Puzzle(object):
             else:
                 print("Solution found at depth %d"%(x))
                 # return result
+                print("Is valid?")
+                print(check_valid(self.init_state, goal_state, result))
                 return [e.value for e in result]
 
         return ["UNSOLVABLE"]

@@ -42,3 +42,9 @@ def execute_move(curr_state, move):
         new_state[x][y] = new_state[x][y - 1]
         new_state[x][y - 1] = 0
     return new_state
+
+
+def check_valid(init_state, goal_state, moves):
+    for move in moves:
+        init_state = execute_move(init_state, move)
+    return init_state == goal_state
