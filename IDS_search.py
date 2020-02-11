@@ -58,7 +58,7 @@ class Puzzle(object):
         initial_node = IDSNode(init_state, moves=())
 
         # Set the limit yourself
-        limit = 11
+        limit = 30
 
         for x in range(1, limit):
             print("Running ids depth %d" %(x))
@@ -69,7 +69,8 @@ class Puzzle(object):
 
             else:
                 print("Solution found at depth %d"%(x))
-                return result
+                # return result
+                return [e.value for e in result]
 
         return ["UNSOLVABLE"]
 
