@@ -1,5 +1,4 @@
-from Util_mod import heuristic_distance, get__position_of_number, MoveDirection
-
+from Util import heuristic_distance, get__position_of_number, MoveDirection
 
 
 class Node:

@@ -1,7 +1,7 @@
 import os
 import sys
 from IDSNode import IDSNode
-from Util_mod import execute_move, check_valid, opposite_move_dict
+from Util import execute_move, check_valid, opposite_move_dict
 import time
 
 

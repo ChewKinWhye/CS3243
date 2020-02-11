@@ -2,7 +2,7 @@ import os
 import sys
 import heapq
 from Node_mod import Node
-from Util_mod import execute_move, state_to_tuple, check_solvable, heuristic_distance_increase, check_valid
+from Util import execute_move, state_to_tuple, check_solvable, heuristic_distance_increase, check_valid
 import time
 
 

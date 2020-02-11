@@ -1,5 +1,5 @@
 import sys
-from Util_mod import execute_move, check_valid, opposite_move_dict, get_possible_moves, state_to_tuple
+from Util import execute_move, check_valid, opposite_move_dict, get_possible_moves, state_to_tuple
 import time
 
 

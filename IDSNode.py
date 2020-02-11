@@ -1,4 +1,4 @@
-from Util_mod import get__position_of_number, MoveDirection
+from Util import get__position_of_number, MoveDirection
 
 
 class IDSNode:
