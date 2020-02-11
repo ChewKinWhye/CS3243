@@ -51,7 +51,7 @@ class Puzzle(object):
             for move in moves:
                 next_state = execute_move(cur_node.state, move)
 
-                if next_state in state_stack:
+                if next_state in state_stack or cur_depth > depth_limit:
                     continue
                 #  simple check which may or may not be efficient
                 # self_loop = False
