@@ -1,7 +1,7 @@
 import os
 import sys
 from IDSNode import IDSNode
-from IDSUtil import execute_move, state_to_tuple, check_valid
+from IDSUtil import execute_move, check_valid, opposite_move_dict
 import time
 
 
@@ -15,35 +15,35 @@ class Puzzle(object):
 
     def dls(self, depth_limit, init_node):
         # Initialization
-        stack = []
-        visited = {state_to_tuple(init_node.state)}
-        stack.append(init_node)
+        stack = [init_node]
 
         while stack:
-
             cur_node = stack.pop()
 
             # Testing purpose
             # print("Stack size: %d"%(len(stack)))
             # print("Current state:\n")
             # print(cur_node)
-            if cur_node.state == IDSNode.goal_state:
+            if cur_node.state == self.goal_state:
                 return cur_node.moves
 
             if len(cur_node.moves) >= depth_limit:
                 continue
 
-            state_tup = state_to_tuple(cur_node.state)
-            visited.add(state_tup)
+            # state_tup = state_to_tuple(cur_node.state)
+            # visited.add(state_tup)
 
             moves = cur_node.get_possible_moves()
+            prev_moves = cur_node.moves
+            if len(prev_moves) > 0:
+                moves.remove(opposite_move_dict[prev_moves[len(prev_moves) - 1]])
 
             for move in moves:
                 next_state = execute_move(cur_node.state, move)
-                next_state_tup = state_to_tuple(next_state)
-                if next_state_tup in visited:
-                    continue
-                next_node = IDSNode(next_state, cur_node.moves + (move,))
+                # next_state_tup = state_to_tuple(next_state)
+                # if next_state_tup in visited:
+                #     continue
+                next_node = IDSNode(next_state, prev_moves + (move,))
                 stack.append(next_node)
 
         return ["UNSOLVABLE"]

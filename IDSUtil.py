@@ -10,6 +10,12 @@ class MoveDirection(Enum):
     RIGHT = "RIGHT"     # 3
 
 
+opposite_move_dict = {MoveDirection.UP: MoveDirection.DOWN,
+                      MoveDirection.DOWN: MoveDirection.UP,
+                      MoveDirection.RIGHT: MoveDirection.LEFT,
+                      MoveDirection.LEFT: MoveDirection.RIGHT}
+
+
 def state_to_tuple(state):
     arr = []
     for row in state:
