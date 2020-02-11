@@ -38,18 +38,24 @@ class Puzzle(object):
             if cur_depth > depth_limit:
                 continue
 
-            # state_tup = state_to_tuple(cur_node.state)
-            # visited.add(state_tup)
-
             moves = cur_node.get_possible_moves()
             if prev_move:
                 moves.remove(opposite_move_dict[prev_move])
 
             for move in moves:
                 next_state = execute_move(cur_node.state, move)
-                # next_state_tup = state_to_tuple(next_state)
-                # if next_state_tup in visited:
+
+                #  simple check which may or may not be efficient
+                # self_loop = False
+                # for node in stack:
+                #     if node.depth > cur_depth - 12:
+                #         break
+                #     if node.state == next_state:
+                #         self_loop = True
+                #         break
+                # if self_loop:
                 #     continue
+
                 next_node = IDSNode(next_state, move, cur_depth)
                 stack.append(next_node)
 
