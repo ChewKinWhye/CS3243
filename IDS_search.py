@@ -17,14 +17,20 @@ class Puzzle(object):
         # Initialization
         move_stack = []
         stack = [init_node]
+        state_stack = []
 
         while stack:
+
             cur_node = stack.pop()
             while cur_node.depth < len(move_stack):
                 move_stack.pop()
 
+            while cur_node.depth < len(state_stack):
+                state_stack.pop()
+
             prev_move = cur_node.move
             move_stack.append(prev_move)
+            state_stack.append(cur_node.state)
             cur_depth = len(move_stack)
 
             # Testing purpose
@@ -45,6 +51,8 @@ class Puzzle(object):
             for move in moves:
                 next_state = execute_move(cur_node.state, move)
 
+                if next_state in state_stack:
+                    continue
                 #  simple check which may or may not be efficient
                 # self_loop = False
                 # for node in stack:
