@@ -22,14 +22,11 @@ class Puzzle(object):
         while stack:
 
             cur_node = stack.pop()
-            if len(cur_node.moves) + 1 > depth_limit:
-                continue
 
             # Testing purpose
             # print("Stack size: %d"%(len(stack)))
             # print("Current state:\n")
             # print(cur_node)
-
             if cur_node.state == IDSNode.goal_state:
                 return cur_node.moves
 
