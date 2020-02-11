@@ -1,3 +1,4 @@
+import gc
 import sys
 from Util import execute_move, check_valid, opposite_move_dict, get_possible_moves, state_to_tuple, tuple_to_state
 import time
@@ -45,6 +46,7 @@ class Puzzle(object):
             next_visited = set()
             frontier = next_frontier
             next_frontier = []
+            gc.collect()
             while frontier:
                 cur_state_tup, cur_move_node = frontier.pop()
                 cur_state = tuple_to_state(cur_state_tup, n)
