@@ -58,11 +58,12 @@ class Puzzle(object):
                         continue
                     if next_state_tup in next_visited:
                         continue
+
+                    next_move_node = MoveNode(move, cur_move_node)
                     if next_state == self.goal_state:
-                        result = self.process_solution(MoveNode(move, cur_move_node))
+                        result = self.process_solution(next_move_node)
                         return result
                     next_visited.add(next_state_tup)
-                    next_move_node = MoveNode(move, cur_move_node)
                     next_frontier.append((next_state, next_move_node))
             if not next_frontier:
                 return ["UNSOLVABLE"]
