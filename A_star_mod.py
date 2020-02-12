@@ -2,8 +2,15 @@ import os
 import sys
 import heapq
 from Node_mod import Node
-from Util import execute_move, state_to_tuple, check_solvable, heuristic_distance_increase, check_valid
+from Util import execute_move, state_to_tuple, opposite_move_dict, \
+    check_solvable, heuristic_distance_increase, check_valid, get_possible_moves
 import time
+
+
+class MoveNode:
+    def __init__(self, move, prev_move_node):
+        self.move = move
+        self.prev_move_node = prev_move_node
 
 
 class Puzzle(object):
@@ -43,9 +50,12 @@ class Puzzle(object):
             #     continue
             # explored_states.add(state_tup)
 
-            curr_dist += 1
-            moves = curr_node.get_possible_moves()
+            moves = get_possible_moves(curr_node.state)
+            if curr_dist > 0:
+                prev_move = curr_node.moves[curr_dist - 1]
+                moves.remove(opposite_move_dict[prev_move])
 
+            curr_dist += 1
             if curr_node.state == goal_state:
                 return self.process_solution(curr_node.moves)
             cur_h_n = curr_node.h_n
@@ -69,6 +79,7 @@ class Puzzle(object):
     # you may add more functions if you think is useful
 
 
+# python A_star_mod.py n_equals_4/input_3.txt test.txt
 if __name__ == "__main__":
     # do NOT modify below
 
