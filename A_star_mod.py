@@ -13,43 +13,53 @@ class Puzzle(object):
         self.goal_state = goal_state
         self.actions = list()
 
+    @staticmethod
+    def process_solution(result):
+        print("Solution found at depth: " + str(len(result)))
+        print("Is valid?")
+        print(check_valid(init_state, goal_state, result))
+        return [e.value for e in result]
+
     def solve(self):
         if not check_solvable(self.init_state):
             return ["UNSOLVABLE"]
         Node.set_goal_state(self.goal_state)
         initial_node = Node(self.init_state, moves=())
         frontier = [initial_node]
-        explored_states = set()
+        # explored_states = set()
+        explored_states = {}
         while len(frontier) != 0:
             curr_node = heapq.heappop(frontier)
             curr_dist = curr_node.g_n
             state_tup = state_to_tuple(curr_node.state)
-            # found_dist = explored_states.get(state_to_tuple(curr_node.state))
-            # # Needed for optimal solution if heuristic_distance is not consistent
-            # if found_dist:  # and found_dist < curr_dist
-            #     continue
 
-            if state_tup in explored_states:
+            # Needed for optimal solution if heuristic_distance is not consistent
+            found_dist = explored_states.get(state_tup)
+            if found_dist and found_dist < curr_dist:
                 continue
+            explored_states[state_tup] = curr_node.g_n
+
+            # if state_tup in explored_states:
+            #     continue
+            # explored_states.add(state_tup)
+
             curr_dist += 1
-            # explored_states[state_to_tuple(curr_node.state)] = curr_node.g_n
-            explored_states.add(state_tup)
             moves = curr_node.get_possible_moves()
-            # Explore node
+
             if curr_node.state == goal_state:
-                print("Is valid?")
-                print(check_valid(self.init_state, goal_state, curr_node.moves))
-                return [e.value for e in curr_node.moves]
+                return self.process_solution(curr_node.moves)
             cur_h_n = curr_node.h_n
             for move in moves:
                 next_state = execute_move(curr_node.state, move)
-                # Add to frontier
                 next_state_tup = state_to_tuple(next_state)
-                # next_found_dist = explored_states.get(next_state_tup)
-                # if next_found_dist:  # and found_dist < curr_dist
+
+                # if next_state_tup in explored_states:
                 #     continue
-                if next_state_tup in explored_states:
+
+                next_found_dist = explored_states.get(next_state_tup)
+                if next_found_dist and next_found_dist <= curr_dist:
                     continue
+
                 new_moves = curr_node.moves + (move,)
                 next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, goal_state, move)
                 new_node = Node(next_state, new_moves, next_h_n)
