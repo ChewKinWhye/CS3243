@@ -128,8 +128,11 @@ if __name__ == "__main__":
         expected_output_file = sys.argv[1].replace("input", "expected_output")
         with open(expected_output_file, 'r') as f:
             lines = f.readlines()
-            print("Online solution depth: " + str(lines[0]).rstrip('\n'))
-            print("Online solution time taken: " + str(lines[1]) + " seconds")
+            if str(lines[0]) == "No solution":
+                print("Online solution: No solution")
+            else:
+                print("Online solution depth: " + str(lines[0]).rstrip('\n'))
+                print("Online solution time taken: " + str(lines[1]) + " seconds")
     except FileNotFoundError:
         print("No expected output")
 
