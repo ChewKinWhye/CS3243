@@ -2,8 +2,15 @@ import os
 import sys
 import heapq
 from Node_mod import Node
-from Util import execute_move, state_to_tuple, check_solvable, heuristic_distance_increase, check_valid
+from Util import execute_move, state_to_tuple, opposite_move_dict, \
+    check_solvable, heuristic_distance_increase, check_valid, get_possible_moves
 import time
+
+
+class MoveNode:
+    def __init__(self, move, prev_move_node):
+        self.move = move
+        self.prev_move_node = prev_move_node
 
 
 class Puzzle(object):
@@ -13,52 +20,63 @@ class Puzzle(object):
         self.goal_state = goal_state
         self.actions = list()
 
+    @staticmethod
+    def process_solution(result):
+        print("Solution found at depth: " + str(len(result)))
+        print("Is solution valid? " + str(check_valid(init_state, goal_state, result)))
+        return [e.value for e in result]
+
     def solve(self):
         if not check_solvable(self.init_state):
             return ["UNSOLVABLE"]
         Node.set_goal_state(self.goal_state)
         initial_node = Node(self.init_state, moves=())
         frontier = [initial_node]
-        explored_states = set()
+        # explored_states = set()
+        explored_states = {}
         while len(frontier) != 0:
             curr_node = heapq.heappop(frontier)
             curr_dist = curr_node.g_n
             state_tup = state_to_tuple(curr_node.state)
-            # found_dist = explored_states.get(state_to_tuple(curr_node.state))
-            # # Needed for optimal solution if heuristic_distance is not consistent
-            # if found_dist:  # and found_dist < curr_dist
-            #     continue
 
-            if state_tup in explored_states:
+            # Needed for optimal solution if heuristic_distance is not consistent
+            found_dist = explored_states.get(state_tup)
+            if found_dist and found_dist < curr_dist:
                 continue
+            explored_states[state_tup] = curr_node.g_n
+
+            # if state_tup in explored_states:
+            #     continue
+            # explored_states.add(state_tup)
+
+            moves = get_possible_moves(curr_node.state)
+            if curr_dist > 0:
+                prev_move = curr_node.moves[curr_dist - 1]
+                moves.remove(opposite_move_dict[prev_move])
+
             curr_dist += 1
-            # explored_states[state_to_tuple(curr_node.state)] = curr_node.g_n
-            explored_states.add(state_tup)
-            moves = curr_node.get_possible_moves()
-            # Explore node
             if curr_node.state == goal_state:
-                print("Is valid?")
-                print(check_valid(self.init_state, goal_state, curr_node.moves))
-                return [e.value for e in curr_node.moves]
+                return self.process_solution(curr_node.moves)
             cur_h_n = curr_node.h_n
             for move in moves:
                 next_state = execute_move(curr_node.state, move)
-                # Add to frontier
                 next_state_tup = state_to_tuple(next_state)
-                # next_found_dist = explored_states.get(next_state_tup)
-                # if next_found_dist:  # and found_dist < curr_dist
+
+                # if next_state_tup in explored_states:
                 #     continue
-                if next_state_tup in explored_states:
+
+                next_found_dist = explored_states.get(next_state_tup)
+                if next_found_dist and next_found_dist <= curr_dist:
                     continue
+
                 new_moves = curr_node.moves + (move,)
                 next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, goal_state, move)
                 new_node = Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
 
-    # you may add more functions if you think is useful
 
-
+# python A_star_mod.py n_equals_4/input_3.txt test.txt
 if __name__ == "__main__":
     # do NOT modify below
 
@@ -105,7 +123,18 @@ if __name__ == "__main__":
     start_time = time.time()
     ans = puzzle.solve()
     elapsed_time = time.time() - start_time
-    print(elapsed_time)
+    print("Time taken: " + str(elapsed_time) + " seconds")
+    try:
+        expected_output_file = sys.argv[1].replace("input", "expected_output")
+        with open(expected_output_file, 'r') as f:
+            lines = f.readlines()
+            if str(lines[0]) == "No solution":
+                print("Online solution: No solution")
+            else:
+                print("Online solution depth: " + str(lines[0]).rstrip('\n'))
+                print("Online solution time taken: " + str(lines[1]) + " seconds")
+    except FileNotFoundError:
+        print("No expected output")
 
     with open(sys.argv[2], 'a') as f:
         for answer in ans:

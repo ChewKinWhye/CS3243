@@ -38,6 +38,18 @@ def state_to_tuple(state):
     return tuple(arr)
 
 
+def tuple_to_state(state_tup, n):
+    state = []
+    i = 0
+    for x in range(n):
+        row = []
+        for y in range(n):
+            row.append(state_tup[i])
+            i += 1
+        state.append(row)
+    return state
+
+
 def get__position_of_number(state, number):
     for i, row in enumerate(state):
         for ii, value in enumerate(row):
@@ -73,14 +85,14 @@ def heuristic_distance(state, goal_state):
         x2, y2 = get__position_of_number(goal_state, i)
 
         # heuristic 1 admissible (manhattan dist)
-        # distance += abs(x1-x2) + abs(y1-y2)
+        distance += abs(x1-x2) + abs(y1-y2)
 
         # heuristic 2 admissible (misplaced squares)
-        # if x1 != x2 and y1 != y2:
+        # if x1 != x2 or y1 != y2:
         #     distance += 1
 
         # heuristic 3 not admissible (squared dist)
-        distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
+        # distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
     return distance
 
 
@@ -99,26 +111,28 @@ def heuristic_distance_increase(state, goal_state, move):
     next_value = state[curr_x][curr_y]
     g_x = (next_value - 1) // n
     g_y = (next_value - 1) % n
+    next_cost = 0
+    curr_cost = 0
 
     # heuristic 1 admissible (manhattan dist)
-    # next_cost = abs(b_x - g_x) + abs(b_y - g_y)
-    # curr_cost = abs(curr_x - g_x) + abs(curr_y - g_y)
+    next_cost += abs(b_x - g_x) + abs(b_y - g_y)
+    curr_cost += abs(curr_x - g_x) + abs(curr_y - g_y)
 
     # heuristic 2 admissible (misplaced squares)
-    # curr_cost = 1
-    # if curr_x == g_x and curr_y == g_y:
-    #     curr_cost = 0
-    # next_cost = 1
-    # if b_x == g_x and b_y == g_y:
-    #     next_cost = 0
+    # if curr_x != g_x or curr_y != g_y:
+    #     curr_cost += 1
+    # if b_x != g_x and b_y != g_y:
+    #     next_cost += 1
 
     # heuristic 3 not admissible (squared dist)
-    next_cost = pow(b_x - g_x, 2) + pow(b_y - g_y, 2)
-    curr_cost = pow(curr_x - g_x, 2) + pow(curr_y - g_y, 2)
+    # next_cost += pow(b_x - g_x, 2) + pow(b_y - g_y, 2)
+    # curr_cost += pow(curr_x - g_x, 2) + pow(curr_y - g_y, 2)
 
     return next_cost - curr_cost
 
 
+# This function takes in the current state and returns the new state
+# after the move has been executed
 def execute_move(curr_state, move):
     x, y = get__position_of_number(curr_state, 0)
     new_state = deepcopy(curr_state)
@@ -139,6 +153,8 @@ def execute_move(curr_state, move):
     # return Node.Node(new_state, new_moves)
 
 
+# This function takes in the initial state and the set of moves
+# and verifies that the moves would reach the goal state
 def check_valid(init_state, goal_state, moves):
     for move in moves:
         init_state = execute_move(init_state, move)
