@@ -23,8 +23,7 @@ class Puzzle(object):
     @staticmethod
     def process_solution(result):
         print("Solution found at depth: " + str(len(result)))
-        print("Is valid?")
-        print(check_valid(init_state, goal_state, result))
+        print("Is solution valid? " + str(check_valid(init_state, goal_state, result)))
         return [e.value for e in result]
 
     def solve(self):
@@ -76,8 +75,6 @@ class Puzzle(object):
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
 
-    # you may add more functions if you think is useful
-
 
 # python A_star_mod.py n_equals_4/input_3.txt test.txt
 if __name__ == "__main__":
@@ -126,7 +123,15 @@ if __name__ == "__main__":
     start_time = time.time()
     ans = puzzle.solve()
     elapsed_time = time.time() - start_time
-    print(elapsed_time)
+    print("Time taken: " + str(elapsed_time) + " seconds")
+    try:
+        expected_output_file = sys.argv[1].replace("input", "expected_output")
+        with open(expected_output_file, 'r') as f:
+            lines = f.readlines()
+            print("Online solution depth: " + str(lines[0]).rstrip('\n'))
+            print("Online solution time taken: " + str(lines[1]) + " seconds")
+    except FileNotFoundError:
+        print("No expected output")
 
     with open(sys.argv[2], 'a') as f:
         for answer in ans:

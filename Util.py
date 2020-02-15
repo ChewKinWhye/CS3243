@@ -131,6 +131,8 @@ def heuristic_distance_increase(state, goal_state, move):
     return next_cost - curr_cost
 
 
+# This function takes in the current state and returns the new state
+# after the move has been executed
 def execute_move(curr_state, move):
     x, y = get__position_of_number(curr_state, 0)
     new_state = deepcopy(curr_state)
@@ -151,6 +153,8 @@ def execute_move(curr_state, move):
     # return Node.Node(new_state, new_moves)
 
 
+# This function takes in the initial state and the set of moves
+# and verifies that the moves would reach the goal state
 def check_valid(init_state, goal_state, moves):
     for move in moves:
         init_state = execute_move(init_state, move)
