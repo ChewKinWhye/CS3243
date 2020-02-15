@@ -21,9 +21,9 @@ class Puzzle(object):
         self.actions = list()
 
     @staticmethod
-    def process_solution(result):
+    def process_solution(self, result):
         print("Solution found at depth: " + str(len(result)))
-        print("Is solution valid? " + str(check_valid(init_state, goal_state, result)))
+        print("Is solution valid? " + str(check_valid(self.init_state, self.goal_state, result)))
         return [e.value for e in result]
 
     def solve(self):
@@ -55,8 +55,8 @@ class Puzzle(object):
                 moves.remove(opposite_move_dict[prev_move])
 
             curr_dist += 1
-            if curr_node.state == goal_state:
-                return self.process_solution(curr_node.moves)
+            if curr_node.state == Node.goal_state:
+                return self.process_solution(self, curr_node.moves)
             cur_h_n = curr_node.h_n
             for move in moves:
                 next_state = execute_move(curr_node.state, move)
@@ -70,7 +70,7 @@ class Puzzle(object):
                     continue
 
                 new_moves = curr_node.moves + (move,)
-                next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, goal_state, move)
+                next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, Node.goal_state, move)
                 new_node = Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
