@@ -21,9 +21,9 @@ class Puzzle(object):
         self.actions = list()
 
     @staticmethod
-    def process_solution(result):
+    def process_solution(self, result):
         print("Solution found at depth: " + str(len(result)))
-        print("Is solution valid? " + str(check_valid(init_state, goal_state, result)))
+        print("Is solution valid? " + str(check_valid(self.init_state, self.goal_state, result)))
         return [e.value for e in result]
 
     def solve(self):
@@ -61,8 +61,8 @@ class Puzzle(object):
                 moves.remove(opposite_move_dict[prev_move])
 
             curr_dist += 1
-            if curr_node.state == goal_state:
-                return self.process_solution(curr_node.moves)
+            if curr_node.state == self.goal_state:
+                return self.process_solution(self, curr_node.moves)
             cur_h_n = curr_node.h_n
             for move in moves:
                 next_state = execute_move(curr_node.state, move)
@@ -136,8 +136,11 @@ if __name__ == "__main__":
         expected_output_file = sys.argv[1].replace("input", "expected_output")
         with open(expected_output_file, 'r') as f:
             lines = f.readlines()
-            print("Online solution depth: " + str(lines[0]).rstrip('\n'))
-            print("Online solution time taken: " + str(lines[1]) + " seconds")
+            if str(lines[0]) == "No solution":
+                print("Online solution: No solution")
+            else:
+                print("Online solution depth: " + str(lines[0]).rstrip('\n'))
+                print("Online solution time taken: " + str(lines[1]) + " seconds")
     except FileNotFoundError:
         print("No expected output")
 
