@@ -32,22 +32,28 @@ class Puzzle(object):
         Node.set_goal_state(self.goal_state)
         initial_node = Node(self.init_state, moves=())
         frontier = [initial_node]
-        # explored_states = set()
-        explored_states = {}
+
+        # For consistent heuristic
+        explored_states = set()
+
+        # For not consistent heuristic
+        # explored_states = {}
+
         while len(frontier) != 0:
             curr_node = heapq.heappop(frontier)
             curr_dist = curr_node.g_n
             state_tup = state_to_tuple(curr_node.state)
 
-            # Needed for optimal solution if heuristic_distance is not consistent
-            found_dist = explored_states.get(state_tup)
-            if found_dist and found_dist < curr_dist:
-                continue
-            explored_states[state_tup] = curr_node.g_n
-
-            # if state_tup in explored_states:
+            # For not consistent heuristic
+            # found_dist = explored_states.get(state_tup)
+            # if found_dist and found_dist < curr_dist:
             #     continue
-            # explored_states.add(state_tup)
+            # explored_states[state_tup] = curr_node.g_n
+
+            # For consistent heuristic
+            if state_tup in explored_states:
+                continue
+            explored_states.add(state_tup)
 
             moves = get_possible_moves(curr_node.state)
             if curr_dist > 0:
@@ -62,15 +68,17 @@ class Puzzle(object):
                 next_state = execute_move(curr_node.state, move)
                 next_state_tup = state_to_tuple(next_state)
 
-                # if next_state_tup in explored_states:
-                #     continue
-
-                next_found_dist = explored_states.get(next_state_tup)
-                if next_found_dist and next_found_dist <= curr_dist:
+                # For consistent heuristic
+                if next_state_tup in explored_states:
                     continue
 
+                # For not consistent heuristic
+                # next_found_dist = explored_states.get(next_state_tup)
+                # if next_found_dist and next_found_dist <= curr_dist:
+                #     continue
+
                 new_moves = curr_node.moves + (move,)
-                next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, goal_state, move)
+                next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, next_state, move)
                 new_node = Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]

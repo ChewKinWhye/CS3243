@@ -57,6 +57,12 @@ def get__position_of_number(state, number):
                 return i, ii
 
 
+def get_goal_position(number, n):
+    x = (number - 1) // n
+    y = (number - 1) % n
+    return x, y
+
+
 # https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
 # https://math.stackexchange.com/questions/293527/how-to-check-if-a-8-puzzle-is-solvable
 def check_solvable(state):
@@ -77,27 +83,75 @@ def check_solvable(state):
     return inversions % 2 == inversion_is_odd
 
 
+# Copied https://github.com/Masum95/N-puzzle-solve-using-A-star-search-algorithm/blob/master/State.py
+def linear_conflict_row(state, row):
+    n = len(state)
+
+    for col in range(n):
+        found_square = state[row][col]
+        if found_square == 0:
+            continue
+        next_goal_pos = get_goal_position(found_square, n)
+        if next_goal_pos[0] == row and next_goal_pos[1] < col:
+            for col2 in range(next_goal_pos[1], col):
+                found_square2 = state[row][col2]
+                if found_square2 == 0:
+                    continue
+                next_goal_pos2 = get_goal_position(found_square2, n)
+                if next_goal_pos2[0] == row and next_goal_pos2[1] > col:
+                    return 2
+    return 0
+
+
+def linear_conflict_col(state, col):
+    n = len(state)
+
+    for row in range(n):
+        found_square = state[row][col]
+        if found_square == 0:
+            continue
+        next_goal_pos = get_goal_position(found_square, n)
+        if next_goal_pos[1] == col and next_goal_pos[0] < row:
+            for row2 in range(next_goal_pos[0], row):
+                found_square2 = state[row2][col]
+                if found_square2 == 0:
+                    continue
+                next_goal_pos2 = get_goal_position(found_square2, n)
+                if next_goal_pos2[1] == col and next_goal_pos2[0] > row:
+                    return 2
+    return 0
+
+
 def heuristic_distance(state, goal_state):
     distance = 0
+    n = len(state)
     state_size = pow(len(state), 2)
     for i in range(1, state_size):
         x1, y1 = get__position_of_number(state, i)
-        x2, y2 = get__position_of_number(goal_state, i)
+        x2, y2 = get_goal_position(i, n)
 
-        # heuristic 1 admissible (manhattan dist)
+        # heuristic 1 admissible and consistent(manhattan dist)
         distance += abs(x1-x2) + abs(y1-y2)
 
-        # heuristic 2 admissible (misplaced squares)
+        # heuristic 2 admissible and consistent (misplaced squares)
         # if x1 != x2 or y1 != y2:
         #     distance += 1
 
         # heuristic 3 not admissible (squared dist)
         # distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
+
+    # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
+    # Surprisingly causes Mem error even tho it dominates manhattan
+    # for row in range(n):
+    #     distance += linear_conflict_row(state, row)
+    # for col in range(n):
+    #     distance += linear_conflict_col(state, col)
+
     return distance
 
 
-def heuristic_distance_increase(state, goal_state, move):
-    n = len(goal_state)
+def heuristic_distance_increase(state, next_state, move):
+    n = len(state)
     b_x, b_y = get__position_of_number(state, 0)
     curr_x, curr_y = (-1, -1)
     if move == MoveDirection.UP:
@@ -109,14 +163,35 @@ def heuristic_distance_increase(state, goal_state, move):
     elif move == MoveDirection.RIGHT:
         curr_x, curr_y = (b_x, b_y - 1)
     next_value = state[curr_x][curr_y]
-    g_x = (next_value - 1) // n
-    g_y = (next_value - 1) % n
+    g_x, g_y = get_goal_position(next_value, n)
     next_cost = 0
     curr_cost = 0
 
     # heuristic 1 admissible (manhattan dist)
     next_cost += abs(b_x - g_x) + abs(b_y - g_y)
     curr_cost += abs(curr_x - g_x) + abs(curr_y - g_y)
+
+    # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
+    # if move == MoveDirection.UP or move == MoveDirection.DOWN:
+    #     if curr_x == g_x or b_x == g_x:
+    #         curr_cost_blank_row = linear_conflict_row(state, b_x)
+    #         next_cost_blank_row = linear_conflict_row(next_state, curr_x)
+    #         if curr_cost_blank_row == 0:
+    #             next_cost += linear_conflict_row(next_state, b_x)  # next_cost_filled_row
+    #         if next_cost_blank_row == 0:
+    #             curr_cost += linear_conflict_row(state, curr_x)  # curr_cost_filled_row
+    #         curr_cost += curr_cost_blank_row
+    #         next_cost += next_cost_blank_row
+    # else:
+    #     if curr_y == g_y or b_y == g_y:
+    #         curr_cost_blank_col = linear_conflict_col(state, b_y)
+    #         next_cost_blank_col = linear_conflict_col(next_state, curr_y)
+    #         if curr_cost_blank_col == 0:
+    #             next_cost += linear_conflict_col(next_state, b_y)  # next_cost_filled_row
+    #         if next_cost_blank_col == 0:
+    #             curr_cost += linear_conflict_col(state, curr_y)  # curr_cost_filled_row
+    #         curr_cost += curr_cost_blank_col
+    #         next_cost += next_cost_blank_col
 
     # heuristic 2 admissible (misplaced squares)
     # if curr_x != g_x or curr_y != g_y:
