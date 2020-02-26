@@ -3,10 +3,10 @@ from enum import Enum
 
 
 class MoveDirection(Enum):
-    UP = "UP"           # 0
-    DOWN = "DOWN"       # 1
-    LEFT = "LEFT"       # 2
-    RIGHT = "RIGHT"     # 3
+    UP = "UP"  # 0
+    DOWN = "DOWN"  # 1
+    LEFT = "LEFT"  # 2
+    RIGHT = "RIGHT"  # 3
 
 
 opposite_move_dict = {MoveDirection.UP: MoveDirection.DOWN,
@@ -62,11 +62,12 @@ goal_position_map = []
 
 
 def get_goal_position(number, n):
+    # return divmod(number - 1, n)
     global goal_position_map
     global last_n_checked_by_get_goal_position
     if n != last_n_checked_by_get_goal_position:
         goal_position_map = [0]
-        for i in range(1, n*n):
+        for i in range(1, n * n):
             goal_position_map.append(divmod(i - 1, n))
         last_n_checked_by_get_goal_position = n
     return goal_position_map[number]
@@ -84,7 +85,7 @@ def check_solvable(state):
             inversion_is_odd = 1
     flat_state = state_to_tuple(state)
     for i, val_i in enumerate(flat_state):
-        for j in range(i+1, len(flat_state)):
+        for j in range(i + 1, len(flat_state)):
             if flat_state[j] == 0:
                 continue
             if val_i > flat_state[j]:
@@ -104,9 +105,9 @@ def linear_conflict_row(state, row):
         if goal_pos[0] == row:
             found_goals.append(goal_pos[1])
 
-    for i in range(1,len(found_goals)):
+    for i in range(1, len(found_goals)):
         # Should be strictly increasing.
-        if found_goals[i] < found_goals[i-1]:
+        if found_goals[i] < found_goals[i - 1]:
             return 2
     return 0
 
@@ -138,7 +139,7 @@ def heuristic_distance(state, goal_state):
         x2, y2 = get_goal_position(i, n)
 
         # heuristic 1 admissible and consistent(manhattan dist)
-        distance += abs(x1-x2) + abs(y1-y2)
+        distance += abs(x1 - x2) + abs(y1 - y2)
 
         # heuristic 2 admissible and consistent (misplaced squares)
         # if x1 != x2 or y1 != y2:
@@ -179,25 +180,25 @@ def heuristic_distance_increase(state, next_state, move):
 
     # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
     if move == MoveDirection.UP or move == MoveDirection.DOWN:
-        if curr_x == g_x:  # next_cost + 1
+        if curr_x == g_x:
             next_cost_blank_row = linear_conflict_row(next_state, curr_x)
             if next_cost_blank_row == 0:
-                curr_cost += linear_conflict_row(state, curr_x)  # curr_cost_filled_row
-        if b_x == g_x:  # next_cost - 1
+                curr_cost += linear_conflict_row(state, curr_x)
+        if b_x == g_x:
             curr_cost_blank_row = linear_conflict_row(state, b_x)
             if curr_cost_blank_row == 0:
-                next_cost += linear_conflict_row(next_state, b_x)  # next_cost_filled_row
+                next_cost += linear_conflict_row(next_state, b_x)
     else:
-        if curr_y == g_y:  # next_cost + 1
+        if curr_y == g_y:
             next_cost_blank_col = linear_conflict_col(next_state, curr_y)
             if next_cost_blank_col == 0:
-                curr_cost += linear_conflict_col(state, curr_y)  # curr_cost_filled_row
-        if b_y == g_y:  # next_cost - 1
+                curr_cost += linear_conflict_col(state, curr_y)
+        if b_y == g_y:
             curr_cost_blank_col = linear_conflict_col(state, b_y)
             if curr_cost_blank_col == 0:
-                next_cost += linear_conflict_col(next_state, b_y)  # next_cost_filled_row
+                next_cost += linear_conflict_col(next_state, b_y)
 
-    # heuristic 2 admissible (misplaced squares)
+                # heuristic 2 admissible (misplaced squares)
     # if curr_x != g_x or curr_y != g_y:
     #     curr_cost += 1
     # if b_x != g_x and b_y != g_y:
@@ -228,8 +229,6 @@ def execute_move(curr_state, move):
         new_state[x][y] = new_state[x][y - 1]
         new_state[x][y - 1] = 0
     return new_state
-    # new_moves = curr_node.moves + (move,)
-    # return Node.Node(new_state, new_moves)
 
 
 # This function takes in the initial state and the set of moves
@@ -238,6 +237,17 @@ def check_valid(init_state, goal_state, moves):
     for move in moves:
         init_state = execute_move(init_state, move)
     return init_state == goal_state
+
+
+def linked_list_to_array(move_node):
+    result = []
+    while move_node:
+        if not move_node.move:
+            break
+        result.append(move_node.move)
+        move_node = move_node.prev_move_node
+    result.reverse()
+    return result
 
 
 def online_solution_check(filename):

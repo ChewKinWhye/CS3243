@@ -10,10 +10,10 @@ class Node:
         self.state = state
         self.moves = moves
         self.g_n = len(moves)
-        if h_n:
-            self.h_n = h_n
-        else:
+        if h_n is None:
             self.h_n = heuristic_distance(self.state, self.goal_state)
+        else:
+            self.h_n = h_n
         self.f_n = self.g_n + self.h_n
 
     def __lt__(self, other):

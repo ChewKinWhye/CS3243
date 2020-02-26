@@ -1,6 +1,7 @@
 import gc
 import sys
-from Util import execute_move, check_valid, opposite_move_dict, get_possible_moves, state_to_tuple, tuple_to_state
+from Util import execute_move, check_valid, opposite_move_dict, \
+    get_possible_moves, state_to_tuple, tuple_to_state, linked_list_to_array
 import time
 
 
@@ -20,13 +21,7 @@ class Puzzle(object):
 
     @staticmethod
     def process_solution(move_node):
-        result = []
-        while move_node:
-            if not move_node.move:
-                break
-            result.append(move_node.move)
-            move_node = move_node.prev_move_node
-        result.reverse()
+        result = linked_list_to_array(move_node)
         print("Is valid?")
         print(check_valid(init_state, goal_state, result))
         return [e.value for e in result]
@@ -74,7 +69,7 @@ class Puzzle(object):
                 return ["UNSOLVABLE"]
     # you may add more functions if you think is useful
 
-
+# python Bfs_search.py n_equals_3/input_2.txt test.txt
 if __name__ == "__main__":
     # do NOT modify below
 

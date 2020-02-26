@@ -8,12 +8,6 @@ from Util import execute_move, state_to_tuple, opposite_move_dict, \
 import time
 
 
-class MoveNode:
-    def __init__(self, move, prev_move_node):
-        self.move = move
-        self.prev_move_node = prev_move_node
-
-
 class Puzzle(object):
     def __init__(self, init_state, goal_state):
         # you may add more attributes if you think is useful
@@ -21,6 +15,8 @@ class Puzzle(object):
         self.goal_state = goal_state
         self.actions = list()
         self.start_time = time.time()
+        self.searched_state_count = 0
+        self.heuristic_execution_count = 0
 
         # For consistent heuristic
         self.explored_states = set()
@@ -35,7 +31,9 @@ class Puzzle(object):
         elapsed_time = time.time() - self.start_time
         print("Time taken: ", elapsed_time, " seconds")
 
-        print("States searched and stored: ", len(self.explored_states))
+        print("States searched: ", self.searched_state_count)
+        print("Times heuristic increase executed: ", self.heuristic_execution_count)
+        print("States stored: ", len(self.explored_states))
 
         online_solution_check(sys.argv[1])
 
@@ -77,6 +75,7 @@ class Puzzle(object):
             for move in moves:
                 next_state = execute_move(curr_node.state, move)
                 next_state_tup = state_to_tuple(next_state)
+                self.searched_state_count += 1
 
                 # For consistent heuristic
                 if next_state_tup in explored_states:
@@ -89,6 +88,7 @@ class Puzzle(object):
 
                 new_moves = curr_node.moves + (move,)
                 next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, next_state, move)
+                self.heuristic_execution_count += 1
                 # For checking consistency
                 # if cur_h_n > next_h_n + 1:
                 #     print("not consistent! ", heuristic_distance_increase(curr_node.state, next_state, move))
