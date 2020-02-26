@@ -19,11 +19,10 @@ class Puzzle(object):
         self.goal_state = goal_state
         self.actions = list()
 
-    @staticmethod
-    def process_solution(move_node):
+    def process_solution(self, move_node):
         result = linked_list_to_array(move_node)
         print("Is valid?")
-        print(check_valid(init_state, goal_state, result))
+        print(check_valid(self.init_state, self.goal_state, result))
         return [e.value for e in result]
 
     def solve(self):
