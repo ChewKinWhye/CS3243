@@ -3,7 +3,8 @@ import sys
 import heapq
 from Node_mod import Node
 from Util import execute_move, state_to_tuple, opposite_move_dict, \
-    check_solvable, heuristic_distance_increase, check_valid, get_possible_moves
+    check_solvable, heuristic_distance_increase, check_valid, get_possible_moves, \
+    online_solution_check
 import time
 
 
@@ -19,11 +20,25 @@ class Puzzle(object):
         self.init_state = init_state
         self.goal_state = goal_state
         self.actions = list()
+        self.start_time = time.time()
 
-    @staticmethod
+        # For consistent heuristic
+        self.explored_states = set()
+
+        # For not consistent heuristic
+        # self.explored_states = {}
+
     def process_solution(self, result):
-        print("Solution found at depth: " + str(len(result)))
-        print("Is solution valid? " + str(check_valid(self.init_state, self.goal_state, result)))
+        print("Solution found at depth: ", len(result))
+        print("Is solution valid? ", check_valid(self.init_state, self.goal_state, result))
+
+        elapsed_time = time.time() - self.start_time
+        print("Time taken: ", elapsed_time, " seconds")
+
+        print("States searched and stored: ", len(self.explored_states))
+
+        online_solution_check(sys.argv[1])
+
         return [e.value for e in result]
 
     def solve(self):
@@ -32,12 +47,7 @@ class Puzzle(object):
         Node.set_goal_state(self.goal_state)
         initial_node = Node(self.init_state, moves=())
         frontier = [initial_node]
-
-        # For consistent heuristic
-        explored_states = set()
-
-        # For not consistent heuristic
-        # explored_states = {}
+        explored_states = self.explored_states
 
         while len(frontier) != 0:
             curr_node = heapq.heappop(frontier)
@@ -62,7 +72,7 @@ class Puzzle(object):
 
             curr_dist += 1
             if curr_node.state == self.goal_state:
-                return self.process_solution(self, curr_node.moves)
+                return self.process_solution(curr_node.moves)
             cur_h_n = curr_node.h_n
             for move in moves:
                 next_state = execute_move(curr_node.state, move)
@@ -79,6 +89,9 @@ class Puzzle(object):
 
                 new_moves = curr_node.moves + (move,)
                 next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, next_state, move)
+                # For checking consistency
+                # if cur_h_n > next_h_n + 1:
+                #     print("not consistent! ", heuristic_distance_increase(curr_node.state, next_state, move))
                 new_node = Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
@@ -128,21 +141,7 @@ if __name__ == "__main__":
     goal_state[n - 1][n - 1] = 0
 
     puzzle = Puzzle(init_state, goal_state)
-    start_time = time.time()
     ans = puzzle.solve()
-    elapsed_time = time.time() - start_time
-    print("Time taken: " + str(elapsed_time) + " seconds")
-    try:
-        expected_output_file = sys.argv[1].replace("input", "expected_output")
-        with open(expected_output_file, 'r') as f:
-            lines = f.readlines()
-            if str(lines[0]) == "No solution":
-                print("Online solution: No solution")
-            else:
-                print("Online solution depth: " + str(lines[0]).rstrip('\n'))
-                print("Online solution time taken: " + str(lines[1]) + " seconds")
-    except FileNotFoundError:
-        print("No expected output")
 
     with open(sys.argv[2], 'a') as f:
         for answer in ans:

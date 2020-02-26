@@ -57,10 +57,19 @@ def get__position_of_number(state, number):
                 return i, ii
 
 
+last_n_checked_by_get_goal_position = 0
+goal_position_map = []
+
+
 def get_goal_position(number, n):
-    x = (number - 1) // n
-    y = (number - 1) % n
-    return x, y
+    global goal_position_map
+    global last_n_checked_by_get_goal_position
+    if n != last_n_checked_by_get_goal_position:
+        goal_position_map = [0]
+        for i in range(1, n*n):
+            goal_position_map.append(divmod(i - 1, n))
+        last_n_checked_by_get_goal_position = n
+    return goal_position_map[number]
 
 
 # https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
@@ -86,39 +95,37 @@ def check_solvable(state):
 # Copied https://github.com/Masum95/N-puzzle-solve-using-A-star-search-algorithm/blob/master/State.py
 def linear_conflict_row(state, row):
     n = len(state)
-
+    found_goals = []
     for col in range(n):
         found_square = state[row][col]
         if found_square == 0:
             continue
-        next_goal_pos = get_goal_position(found_square, n)
-        if next_goal_pos[0] == row and next_goal_pos[1] < col:
-            for col2 in range(next_goal_pos[1], col):
-                found_square2 = state[row][col2]
-                if found_square2 == 0:
-                    continue
-                next_goal_pos2 = get_goal_position(found_square2, n)
-                if next_goal_pos2[0] == row and next_goal_pos2[1] > col:
-                    return 2
+        goal_pos = get_goal_position(found_square, n)
+        if goal_pos[0] == row:
+            found_goals.append(goal_pos[1])
+
+    for i in range(1,len(found_goals)):
+        # Should be strictly increasing.
+        if found_goals[i] < found_goals[i-1]:
+            return 2
     return 0
 
 
 def linear_conflict_col(state, col):
     n = len(state)
-
+    found_goals = []
     for row in range(n):
         found_square = state[row][col]
         if found_square == 0:
             continue
-        next_goal_pos = get_goal_position(found_square, n)
-        if next_goal_pos[1] == col and next_goal_pos[0] < row:
-            for row2 in range(next_goal_pos[0], row):
-                found_square2 = state[row2][col]
-                if found_square2 == 0:
-                    continue
-                next_goal_pos2 = get_goal_position(found_square2, n)
-                if next_goal_pos2[1] == col and next_goal_pos2[0] > row:
-                    return 2
+        goal_pos = get_goal_position(found_square, n)
+        if goal_pos[1] == col:
+            found_goals.append(goal_pos[0])
+
+    for i in range(1, len(found_goals)):
+        # Should be strictly increasing.
+        if found_goals[i] < found_goals[i - 1]:
+            return 2
     return 0
 
 
@@ -141,11 +148,10 @@ def heuristic_distance(state, goal_state):
         # distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
 
     # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
-    # Surprisingly causes Mem error even tho it dominates manhattan
-    # for row in range(n):
-    #     distance += linear_conflict_row(state, row)
-    # for col in range(n):
-    #     distance += linear_conflict_col(state, col)
+    for row in range(n):
+        distance += linear_conflict_row(state, row)
+    for col in range(n):
+        distance += linear_conflict_col(state, col)
 
     return distance
 
@@ -172,26 +178,24 @@ def heuristic_distance_increase(state, next_state, move):
     curr_cost += abs(curr_x - g_x) + abs(curr_y - g_y)
 
     # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
-    # if move == MoveDirection.UP or move == MoveDirection.DOWN:
-    #     if curr_x == g_x or b_x == g_x:
-    #         curr_cost_blank_row = linear_conflict_row(state, b_x)
-    #         next_cost_blank_row = linear_conflict_row(next_state, curr_x)
-    #         if curr_cost_blank_row == 0:
-    #             next_cost += linear_conflict_row(next_state, b_x)  # next_cost_filled_row
-    #         if next_cost_blank_row == 0:
-    #             curr_cost += linear_conflict_row(state, curr_x)  # curr_cost_filled_row
-    #         curr_cost += curr_cost_blank_row
-    #         next_cost += next_cost_blank_row
-    # else:
-    #     if curr_y == g_y or b_y == g_y:
-    #         curr_cost_blank_col = linear_conflict_col(state, b_y)
-    #         next_cost_blank_col = linear_conflict_col(next_state, curr_y)
-    #         if curr_cost_blank_col == 0:
-    #             next_cost += linear_conflict_col(next_state, b_y)  # next_cost_filled_row
-    #         if next_cost_blank_col == 0:
-    #             curr_cost += linear_conflict_col(state, curr_y)  # curr_cost_filled_row
-    #         curr_cost += curr_cost_blank_col
-    #         next_cost += next_cost_blank_col
+    if move == MoveDirection.UP or move == MoveDirection.DOWN:
+        if curr_x == g_x:  # next_cost + 1
+            next_cost_blank_row = linear_conflict_row(next_state, curr_x)
+            if next_cost_blank_row == 0:
+                curr_cost += linear_conflict_row(state, curr_x)  # curr_cost_filled_row
+        if b_x == g_x:  # next_cost - 1
+            curr_cost_blank_row = linear_conflict_row(state, b_x)
+            if curr_cost_blank_row == 0:
+                next_cost += linear_conflict_row(next_state, b_x)  # next_cost_filled_row
+    else:
+        if curr_y == g_y:  # next_cost + 1
+            next_cost_blank_col = linear_conflict_col(next_state, curr_y)
+            if next_cost_blank_col == 0:
+                curr_cost += linear_conflict_col(state, curr_y)  # curr_cost_filled_row
+        if b_y == g_y:  # next_cost - 1
+            curr_cost_blank_col = linear_conflict_col(state, b_y)
+            if curr_cost_blank_col == 0:
+                next_cost += linear_conflict_col(next_state, b_y)  # next_cost_filled_row
 
     # heuristic 2 admissible (misplaced squares)
     # if curr_x != g_x or curr_y != g_y:
@@ -234,3 +238,17 @@ def check_valid(init_state, goal_state, moves):
     for move in moves:
         init_state = execute_move(init_state, move)
     return init_state == goal_state
+
+
+def online_solution_check(filename):
+    try:
+        expected_output_file = filename.replace("input", "expected_output")
+        with open(expected_output_file, 'r') as f:
+            lines = f.readlines()
+            if str(lines[0]) == "No solution":
+                print("Online solution: No solution")
+            else:
+                print("Online solution depth: " + str(lines[0]).rstrip('\n'))
+                print("Online solution time taken: " + str(lines[1]) + " seconds")
+    except FileNotFoundError:
+        print("No expected output")
