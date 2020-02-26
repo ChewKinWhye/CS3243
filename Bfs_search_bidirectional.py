@@ -1,15 +1,12 @@
 import gc
 import sys
+from collections import namedtuple
 from Util import execute_move, check_valid, opposite_move_dict, \
     get_possible_moves, state_to_tuple, tuple_to_state, linked_list_to_array, \
     check_solvable
 import time
 
-
-class MoveNode:
-    def __init__(self, move, prev_move_node):
-        self.move = move
-        self.prev_move_node = prev_move_node
+MoveNode = namedtuple("MoveNode", ["move", "prev_move_node"])
 
 
 class Puzzle(object):
