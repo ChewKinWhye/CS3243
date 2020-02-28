@@ -72,5 +72,5 @@ def run_test_cases():
         print("Time taken: " + str(elapsed_time) + " seconds")
 
 
-# create_test_cases()
+create_test_cases()
 run_test_cases()
