@@ -17,6 +17,7 @@ class Puzzle(object):
         self.goal_state = goal_state
         self.actions = list()
         self.total_states_stored = 0
+        self.start_time = time.time()
 
     def process_solution(self, move_node, opp_move_node):
         result = linked_list_to_array(move_node)
@@ -26,6 +27,10 @@ class Puzzle(object):
 
         print("Is valid?", check_valid(self.init_state, self.goal_state, result))
         print("Total states stored: ", self.total_states_stored)
+
+        elapsed_time = time.time() - self.start_time
+        print("Time taken: ", elapsed_time, " seconds")
+
         return [e.value for e in result]
 
     def solve(self):
@@ -152,10 +157,7 @@ if __name__ == "__main__":
     goal_state[n - 1][n - 1] = 0
 
     puzzle = Puzzle(init_state, goal_state)
-    start_time = time.time()
     ans = puzzle.solve()
-    elapsed_time = time.time() - start_time
-    print(elapsed_time)
 
     with open(sys.argv[2], 'a') as f:
         for answer in ans:
