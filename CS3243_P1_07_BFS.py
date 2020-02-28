@@ -181,9 +181,9 @@ class Puzzle(object):
         cur_depth = 0
         while True:
             cur_depth += 1
-            # print("next_visited final size: ", len(next_visited), " opp_: ", len(opp_next_visited))
+            print("next_visited final size: ", len(next_visited), " opp_: ", len(opp_next_visited))
             self.total_states_stored += len(next_visited) + len(opp_next_visited)
-            # print("Current depth is: " + str(cur_depth))
+            print("Current depth is: " + str(cur_depth))
             cur_visited = next_visited
             next_visited = {}
             frontier = next_frontier
