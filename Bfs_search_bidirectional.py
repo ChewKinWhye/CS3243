@@ -1,16 +1,11 @@
 import gc
 import sys
 from collections import namedtuple
-from Util import execute_move, check_valid, opposite_move_dict, \
-    get_possible_moves, state_to_tuple, tuple_to_state, linked_list_to_array, \
-    check_solvable
+from copy import deepcopy
 import time
-
-MoveNode = namedtuple("MoveNode", ["move", "prev_move_node"])
 
 
 class Puzzle(object):
-
     def __init__(self, init_state, goal_state):
         # you may add more attributes if you think is useful
         self.init_state = init_state
@@ -19,30 +14,163 @@ class Puzzle(object):
         self.total_states_stored = 0
         self.start_time = time.time()
 
+        n = len(init_state)
+        self.goal_position_map = [0]
+        for i in range(1, n * n):
+            self.goal_position_map.append(divmod(i - 1, n))
+
+    MoveNode = namedtuple("MoveNode", ["move", "prev_move_node"])
+
+    class MoveDirection:
+        UP = 0
+        DOWN = 1
+        LEFT = 2
+        RIGHT = 3
+
+    moveDirectionValue = ["UP", "DOWN", "LEFT", "RIGHT"]
+
+    opposite_move_dict = {MoveDirection.UP: MoveDirection.DOWN,
+                          MoveDirection.DOWN: MoveDirection.UP,
+                          MoveDirection.RIGHT: MoveDirection.LEFT,
+                          MoveDirection.LEFT: MoveDirection.RIGHT}
+
+    class Node:
+        def __init__(self, state, moves, h_n=None):
+            self.state = state
+            self.moves = moves
+            self.g_n = len(moves)
+            self.h_n = h_n
+            self.f_n = self.g_n + self.h_n
+
+        def __lt__(self, other):
+            return self.f_n < other.f_n
+
+    # https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
+    # https://math.stackexchange.com/questions/293527/how-to-check-if-a-8-puzzle-is-solvable
+    @staticmethod
+    def check_solvable(state):
+        inversions = 0
+        inversion_is_odd = 0
+        if len(state) % 2 == 0:
+            blank_row, blank_y = Puzzle.get_position_of_number(state, 0)
+            if blank_row % 2 == 0:
+                inversion_is_odd = 1
+        flat_state = Puzzle.state_to_tuple(state)
+        for i, val_i in enumerate(flat_state):
+            for j in range(i + 1, len(flat_state)):
+                if flat_state[j] == 0:
+                    continue
+                if val_i > flat_state[j]:
+                    inversions += 1
+        return inversions % 2 == inversion_is_odd
+
+    @staticmethod
+    def state_to_tuple(state):
+        arr = []
+        for row in state:
+            for val in row:
+                arr.append(val)
+        return tuple(arr)
+
+    @staticmethod
+    def tuple_to_state(state_tup, n):
+        state = []
+        i = 0
+        for x in range(n):
+            row = []
+            for y in range(n):
+                row.append(state_tup[i])
+                i += 1
+            state.append(row)
+        return state
+
+    @staticmethod
+    def get_position_of_number(state, number):
+        for i, row in enumerate(state):
+            for ii, value in enumerate(row):
+                if value == number:
+                    return i, ii
+
+    @staticmethod
+    def get_possible_moves(state):
+        MoveDirection = Puzzle.MoveDirection
+        x, y = Puzzle.get_position_of_number(state, 0)
+        puzzle_size = len(state)
+        moves = []
+        if x != 0:
+            moves.append(MoveDirection.DOWN)
+        if x + 1 != puzzle_size:
+            moves.append(MoveDirection.UP)
+        if y != 0:
+            moves.append(MoveDirection.RIGHT)
+        if y + 1 != puzzle_size:
+            moves.append(MoveDirection.LEFT)
+        return moves
+
+    # This function takes in the current state and returns the new state
+    # after the move has been executed
+    @staticmethod
+    def execute_move(curr_state, move):
+        MoveDirection = Puzzle.MoveDirection
+        x, y = Puzzle.get_position_of_number(curr_state, 0)
+        new_state = deepcopy(curr_state)
+        if move == MoveDirection.UP:
+            new_state[x][y] = new_state[x + 1][y]
+            new_state[x + 1][y] = 0
+        elif move == MoveDirection.DOWN:
+            new_state[x][y] = new_state[x - 1][y]
+            new_state[x - 1][y] = 0
+        elif move == MoveDirection.LEFT:
+            new_state[x][y] = new_state[x][y + 1]
+            new_state[x][y + 1] = 0
+        elif move == MoveDirection.RIGHT:
+            new_state[x][y] = new_state[x][y - 1]
+            new_state[x][y - 1] = 0
+        return new_state
+
+    # This function takes in the initial state and the set of moves
+    # and verifies that the moves would reach the goal state
+    @staticmethod
+    def check_valid(init_state, goal_state, moves):
+        for move in moves:
+            init_state = Puzzle.execute_move(init_state, move)
+        return init_state == goal_state
+
+    @staticmethod
+    def linked_list_to_array(move_node):
+        result = []
+        while move_node is not None:
+            if move_node.move is None:
+                break
+            result.append(move_node.move)
+            move_node = move_node.prev_move_node
+        result.reverse()
+        return result
+
     def process_solution(self, move_node, opp_move_node):
-        result = linked_list_to_array(move_node)
-        opp_result = linked_list_to_array(opp_move_node)
+        elapsed_time = time.time() - self.start_time
+        result = Puzzle.linked_list_to_array(move_node)
+        opp_result = Puzzle.linked_list_to_array(opp_move_node)
         opp_result.reverse()
         result.extend(opp_result)
 
-        print("Is valid?", check_valid(self.init_state, self.goal_state, result))
+        print("Is valid?", Puzzle.check_valid(self.init_state, self.goal_state, result))
         print("Total states stored: ", self.total_states_stored)
 
-        elapsed_time = time.time() - self.start_time
         print("Time taken: ", elapsed_time, " seconds")
 
-        return [e.value for e in result]
+        return [Puzzle.moveDirectionValue[e] for e in result]
 
     def solve(self):
-        if not check_solvable(self.init_state):
+        if not Puzzle.check_solvable(self.init_state):
             return ["UNSOLVABLE"]
         n = len(self.init_state)
-        initial_move = MoveNode(None, None)
-        init_tup = state_to_tuple(self.init_state)
+        initial_move = Puzzle.MoveNode(None, None)
+        init_tup = Puzzle.state_to_tuple(self.init_state)
         next_frontier = [(init_tup, initial_move)]
         next_visited = {init_tup: initial_move}
 
-        goal_tup = state_to_tuple(self.goal_state)
+        goal_tup = Puzzle.state_to_tuple(self.goal_state)
         opp_next_frontier = [(goal_tup, initial_move)]
         opp_next_visited = {goal_tup}
 
@@ -59,22 +187,22 @@ class Puzzle(object):
             gc.collect()
             while frontier:
                 cur_state_tup, cur_move_node = frontier.pop()
-                cur_state = tuple_to_state(cur_state_tup, n)
+                cur_state = Puzzle.tuple_to_state(cur_state_tup, n)
 
                 prev_move = cur_move_node.move
-                moves = get_possible_moves(cur_state)
+                moves = Puzzle.get_possible_moves(cur_state)
                 if prev_move:
-                    moves.remove(opposite_move_dict[prev_move])
+                    moves.remove(Puzzle.opposite_move_dict[prev_move])
 
                 for move in moves:
-                    next_state = execute_move(cur_state, move)
-                    next_state_tup = state_to_tuple(next_state)
+                    next_state = Puzzle.execute_move(cur_state, move)
+                    next_state_tup = Puzzle.state_to_tuple(next_state)
                     if next_state_tup in cur_visited:
                         continue
                     if next_state_tup in next_visited:
                         continue
 
-                    next_move_node = MoveNode(move, cur_move_node)
+                    next_move_node = self.MoveNode(move, cur_move_node)
                     next_visited[next_state_tup] = next_move_node
                     next_frontier.append((next_state_tup, next_move_node))
 
@@ -85,22 +213,22 @@ class Puzzle(object):
             opp_next_frontier = []
             while opp_frontier:
                 cur_state_tup, cur_move_node = opp_frontier.pop()
-                cur_state = tuple_to_state(cur_state_tup, n)
+                cur_state = Puzzle.tuple_to_state(cur_state_tup, n)
 
                 prev_move = cur_move_node.move
-                moves = get_possible_moves(cur_state)
+                moves = Puzzle.get_possible_moves(cur_state)
                 if prev_move:
                     moves.remove(prev_move)
 
                 for move in moves:
-                    next_state = execute_move(cur_state, move)
-                    next_state_tup = state_to_tuple(next_state)
+                    next_state = Puzzle.execute_move(cur_state, move)
+                    next_state_tup = Puzzle.state_to_tuple(next_state)
                     if next_state_tup in opp_cur_visited:
                         continue
                     if next_state_tup in opp_next_visited:
                         continue
 
-                    next_move_node = MoveNode(opposite_move_dict[move], cur_move_node)
+                    next_move_node = self.MoveNode(Puzzle.opposite_move_dict[move], cur_move_node)
 
                     if next_state_tup in next_visited:
                         result = self.process_solution(next_visited[next_state_tup], next_move_node)
