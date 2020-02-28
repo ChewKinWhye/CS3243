@@ -28,11 +28,13 @@ class Puzzle(object):
 
     ################################ HELPER METHODS ################################
 
-    class MoveDirection(Enum):
-        UP = "UP"  # 0
-        DOWN = "DOWN"  # 1
-        LEFT = "LEFT"  # 2
-        RIGHT = "RIGHT"  # 3
+    class MoveDirection:
+        UP = 0  # 0
+        DOWN = 1  # 1
+        LEFT = 2  # 2
+        RIGHT = 3  # 3
+
+    moveDirectionValue = ["UP", "DOWN", "LEFT", "RIGHT"]
 
     opposite_move_dict = {MoveDirection.UP: MoveDirection.DOWN,
                           MoveDirection.DOWN: MoveDirection.UP,
@@ -243,7 +245,6 @@ class Puzzle(object):
 
         return next_cost - curr_cost
 
-
     # This function takes in the initial state and the set of moves
     # and verifies that the moves would reach the goal state
     @staticmethod
@@ -263,7 +264,7 @@ class Puzzle(object):
         print("Times heuristic increase executed: ", self.heuristic_execution_count)
         print("States stored: ", len(self.explored_states))
 
-        return [e.value for e in result]
+        return [Puzzle.moveDirectionValue[e] for e in result]
 
     def solve(self):
         if not self.check_solvable(self.init_state):
