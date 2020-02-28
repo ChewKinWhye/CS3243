@@ -2,7 +2,6 @@ import os
 import sys
 import heapq
 import time
-from enum import Enum
 from copy import deepcopy
 
 
@@ -57,10 +56,9 @@ class Puzzle(object):
     # https://math.stackexchange.com/questions/293527/how-to-check-if-a-8-puzzle-is-solvable
     @staticmethod
     def check_solvable(state):
-        n = len(state)
         inversions = 0
         inversion_is_odd = 0
-        if n % 2 == 0:
+        if len(state) % 2 == 0:
             blank_row, blank_y = Puzzle.get_position_of_number(state, 0)
             if blank_row % 2 == 0:
                 inversion_is_odd = 1
@@ -109,9 +107,8 @@ class Puzzle(object):
 
     # Copied https://github.com/Masum95/N-puzzle-solve-using-A-star-search-algorithm/blob/master/State.py
     def linear_conflict_row(self, state, row):
-        n = len(state)
         found_goals = []
-        for col in range(n):
+        for col in range(len(state)):
             found_square = state[row][col]
             if found_square == 0:
                 continue
@@ -126,9 +123,8 @@ class Puzzle(object):
         return 0
 
     def linear_conflict_col(self, state, col):
-        n = len(state)
         found_goals = []
-        for row in range(n):
+        for row in range(len(state)):
             found_square = state[row][col]
             if found_square == 0:
                 continue
@@ -191,7 +187,6 @@ class Puzzle(object):
         return new_state
 
     def heuristic_distance_increase(self, state, next_state, move):
-        n = len(state)
         MoveDirection = Puzzle.MoveDirection
         b_x, b_y = Puzzle.get_position_of_number(state, 0)
         curr_x, curr_y = (-1, -1)
