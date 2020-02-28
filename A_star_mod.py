@@ -3,14 +3,9 @@ import sys
 import heapq
 from Node_mod import Node
 from Util import execute_move, state_to_tuple, opposite_move_dict, \
-    check_solvable, heuristic_distance_increase, check_valid, get_possible_moves
+    check_solvable, heuristic_distance_increase, check_valid, get_possible_moves, \
+    online_solution_check
 import time
-
-
-class MoveNode:
-    def __init__(self, move, prev_move_node):
-        self.move = move
-        self.prev_move_node = prev_move_node
 
 
 class Puzzle(object):
@@ -19,11 +14,29 @@ class Puzzle(object):
         self.init_state = init_state
         self.goal_state = goal_state
         self.actions = list()
+        self.start_time = time.time()
+        self.searched_state_count = 0
+        self.heuristic_execution_count = 0
 
-    @staticmethod
-    def process_solution(result):
-        print("Solution found at depth: " + str(len(result)))
-        print("Is solution valid? " + str(check_valid(init_state, goal_state, result)))
+        # For consistent heuristic
+        self.explored_states = set()
+
+        # For not consistent heuristic
+        # self.explored_states = {}
+
+    def process_solution(self, result):
+        print("Solution found at depth: ", len(result))
+        print("Is solution valid? ", check_valid(self.init_state, self.goal_state, result))
+
+        elapsed_time = time.time() - self.start_time
+        print("Time taken: ", elapsed_time, " seconds")
+
+        print("States searched: ", self.searched_state_count)
+        print("Times heuristic increase executed: ", self.heuristic_execution_count)
+        print("States stored: ", len(self.explored_states))
+
+        online_solution_check(sys.argv[1])
+
         return [e.value for e in result]
 
     def solve(self):
@@ -32,22 +45,23 @@ class Puzzle(object):
         Node.set_goal_state(self.goal_state)
         initial_node = Node(self.init_state, moves=())
         frontier = [initial_node]
-        # explored_states = set()
-        explored_states = {}
+        explored_states = self.explored_states
+
         while len(frontier) != 0:
             curr_node = heapq.heappop(frontier)
             curr_dist = curr_node.g_n
             state_tup = state_to_tuple(curr_node.state)
 
-            # Needed for optimal solution if heuristic_distance is not consistent
-            found_dist = explored_states.get(state_tup)
-            if found_dist and found_dist < curr_dist:
-                continue
-            explored_states[state_tup] = curr_node.g_n
-
-            # if state_tup in explored_states:
+            # For not consistent heuristic
+            # found_dist = explored_states.get(state_tup)
+            # if found_dist and found_dist < curr_dist:
             #     continue
-            # explored_states.add(state_tup)
+            # explored_states[state_tup] = curr_node.g_n
+
+            # For consistent heuristic
+            if state_tup in explored_states:
+                continue
+            explored_states.add(state_tup)
 
             moves = get_possible_moves(curr_node.state)
             if curr_dist > 0:
@@ -55,22 +69,29 @@ class Puzzle(object):
                 moves.remove(opposite_move_dict[prev_move])
 
             curr_dist += 1
-            if curr_node.state == goal_state:
+            if curr_node.state == self.goal_state:
                 return self.process_solution(curr_node.moves)
             cur_h_n = curr_node.h_n
             for move in moves:
                 next_state = execute_move(curr_node.state, move)
                 next_state_tup = state_to_tuple(next_state)
+                self.searched_state_count += 1
 
-                # if next_state_tup in explored_states:
-                #     continue
-
-                next_found_dist = explored_states.get(next_state_tup)
-                if next_found_dist and next_found_dist <= curr_dist:
+                # For consistent heuristic
+                if next_state_tup in explored_states:
                     continue
 
+                # For not consistent heuristic
+                # next_found_dist = explored_states.get(next_state_tup)
+                # if next_found_dist and next_found_dist <= curr_dist:
+                #     continue
+
                 new_moves = curr_node.moves + (move,)
-                next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, goal_state, move)
+                next_h_n = cur_h_n + heuristic_distance_increase(curr_node.state, next_state, move)
+                self.heuristic_execution_count += 1
+                # For checking consistency
+                # if cur_h_n > next_h_n + 1:
+                #     print("not consistent! ", heuristic_distance_increase(curr_node.state, next_state, move))
                 new_node = Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
@@ -120,21 +141,7 @@ if __name__ == "__main__":
     goal_state[n - 1][n - 1] = 0
 
     puzzle = Puzzle(init_state, goal_state)
-    start_time = time.time()
     ans = puzzle.solve()
-    elapsed_time = time.time() - start_time
-    print("Time taken: " + str(elapsed_time) + " seconds")
-    try:
-        expected_output_file = sys.argv[1].replace("input", "expected_output")
-        with open(expected_output_file, 'r') as f:
-            lines = f.readlines()
-            if str(lines[0]) == "No solution":
-                print("Online solution: No solution")
-            else:
-                print("Online solution depth: " + str(lines[0]).rstrip('\n'))
-                print("Online solution time taken: " + str(lines[1]) + " seconds")
-    except FileNotFoundError:
-        print("No expected output")
 
     with open(sys.argv[2], 'a') as f:
         for answer in ans:

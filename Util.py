@@ -3,10 +3,10 @@ from enum import Enum
 
 
 class MoveDirection(Enum):
-    UP = "UP"           # 0
-    DOWN = "DOWN"       # 1
-    LEFT = "LEFT"       # 2
-    RIGHT = "RIGHT"     # 3
+    UP = "UP"  # 0
+    DOWN = "DOWN"  # 1
+    LEFT = "LEFT"  # 2
+    RIGHT = "RIGHT"  # 3
 
 
 opposite_move_dict = {MoveDirection.UP: MoveDirection.DOWN,
@@ -57,6 +57,22 @@ def get__position_of_number(state, number):
                 return i, ii
 
 
+last_n_checked_by_get_goal_position = 0
+goal_position_map = []
+
+
+def get_goal_position(number, n):
+    # return divmod(number - 1, n)
+    global goal_position_map
+    global last_n_checked_by_get_goal_position
+    if n != last_n_checked_by_get_goal_position:
+        goal_position_map = [0]
+        for i in range(1, n * n):
+            goal_position_map.append(divmod(i - 1, n))
+        last_n_checked_by_get_goal_position = n
+    return goal_position_map[number]
+
+
 # https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
 # https://math.stackexchange.com/questions/293527/how-to-check-if-a-8-puzzle-is-solvable
 def check_solvable(state):
@@ -69,7 +85,7 @@ def check_solvable(state):
             inversion_is_odd = 1
     flat_state = state_to_tuple(state)
     for i, val_i in enumerate(flat_state):
-        for j in range(i+1, len(flat_state)):
+        for j in range(i + 1, len(flat_state)):
             if flat_state[j] == 0:
                 continue
             if val_i > flat_state[j]:
@@ -77,27 +93,72 @@ def check_solvable(state):
     return inversions % 2 == inversion_is_odd
 
 
+# Copied https://github.com/Masum95/N-puzzle-solve-using-A-star-search-algorithm/blob/master/State.py
+def linear_conflict_row(state, row):
+    n = len(state)
+    found_goals = []
+    for col in range(n):
+        found_square = state[row][col]
+        if found_square == 0:
+            continue
+        goal_pos = get_goal_position(found_square, n)
+        if goal_pos[0] == row:
+            found_goals.append(goal_pos[1])
+
+    for i in range(1, len(found_goals)):
+        # Should be strictly increasing.
+        if found_goals[i] < found_goals[i - 1]:
+            return 2
+    return 0
+
+
+def linear_conflict_col(state, col):
+    n = len(state)
+    found_goals = []
+    for row in range(n):
+        found_square = state[row][col]
+        if found_square == 0:
+            continue
+        goal_pos = get_goal_position(found_square, n)
+        if goal_pos[1] == col:
+            found_goals.append(goal_pos[0])
+
+    for i in range(1, len(found_goals)):
+        # Should be strictly increasing.
+        if found_goals[i] < found_goals[i - 1]:
+            return 2
+    return 0
+
+
 def heuristic_distance(state, goal_state):
     distance = 0
+    n = len(state)
     state_size = pow(len(state), 2)
     for i in range(1, state_size):
         x1, y1 = get__position_of_number(state, i)
-        x2, y2 = get__position_of_number(goal_state, i)
+        x2, y2 = get_goal_position(i, n)
 
-        # heuristic 1 admissible (manhattan dist)
-        distance += abs(x1-x2) + abs(y1-y2)
+        # heuristic 1 admissible and consistent(manhattan dist)
+        distance += abs(x1 - x2) + abs(y1 - y2)
 
-        # heuristic 2 admissible (misplaced squares)
+        # heuristic 2 admissible and consistent (misplaced squares)
         # if x1 != x2 or y1 != y2:
         #     distance += 1
 
         # heuristic 3 not admissible (squared dist)
         # distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
+
+    # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
+    for row in range(n):
+        distance += linear_conflict_row(state, row)
+    for col in range(n):
+        distance += linear_conflict_col(state, col)
+
     return distance
 
 
-def heuristic_distance_increase(state, goal_state, move):
-    n = len(goal_state)
+def heuristic_distance_increase(state, next_state, move):
+    n = len(state)
     b_x, b_y = get__position_of_number(state, 0)
     curr_x, curr_y = (-1, -1)
     if move == MoveDirection.UP:
@@ -109,8 +170,7 @@ def heuristic_distance_increase(state, goal_state, move):
     elif move == MoveDirection.RIGHT:
         curr_x, curr_y = (b_x, b_y - 1)
     next_value = state[curr_x][curr_y]
-    g_x = (next_value - 1) // n
-    g_y = (next_value - 1) % n
+    g_x, g_y = get_goal_position(next_value, n)
     next_cost = 0
     curr_cost = 0
 
@@ -118,7 +178,27 @@ def heuristic_distance_increase(state, goal_state, move):
     next_cost += abs(b_x - g_x) + abs(b_y - g_y)
     curr_cost += abs(curr_x - g_x) + abs(curr_y - g_y)
 
-    # heuristic 2 admissible (misplaced squares)
+    # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
+    if move == MoveDirection.UP or move == MoveDirection.DOWN:
+        if curr_x == g_x:
+            next_cost_blank_row = linear_conflict_row(next_state, curr_x)
+            if next_cost_blank_row == 0:
+                curr_cost += linear_conflict_row(state, curr_x)
+        if b_x == g_x:
+            curr_cost_blank_row = linear_conflict_row(state, b_x)
+            if curr_cost_blank_row == 0:
+                next_cost += linear_conflict_row(next_state, b_x)
+    else:
+        if curr_y == g_y:
+            next_cost_blank_col = linear_conflict_col(next_state, curr_y)
+            if next_cost_blank_col == 0:
+                curr_cost += linear_conflict_col(state, curr_y)
+        if b_y == g_y:
+            curr_cost_blank_col = linear_conflict_col(state, b_y)
+            if curr_cost_blank_col == 0:
+                next_cost += linear_conflict_col(next_state, b_y)
+
+                # heuristic 2 admissible (misplaced squares)
     # if curr_x != g_x or curr_y != g_y:
     #     curr_cost += 1
     # if b_x != g_x and b_y != g_y:
@@ -149,8 +229,6 @@ def execute_move(curr_state, move):
         new_state[x][y] = new_state[x][y - 1]
         new_state[x][y - 1] = 0
     return new_state
-    # new_moves = curr_node.moves + (move,)
-    # return Node.Node(new_state, new_moves)
 
 
 # This function takes in the initial state and the set of moves
@@ -159,3 +237,28 @@ def check_valid(init_state, goal_state, moves):
     for move in moves:
         init_state = execute_move(init_state, move)
     return init_state == goal_state
+
+
+def linked_list_to_array(move_node):
+    result = []
+    while move_node:
+        if not move_node.move:
+            break
+        result.append(move_node.move)
+        move_node = move_node.prev_move_node
+    result.reverse()
+    return result
+
+
+def online_solution_check(filename):
+    try:
+        expected_output_file = filename.replace("input", "expected_output")
+        with open(expected_output_file, 'r') as f:
+            lines = f.readlines()
+            if str(lines[0]) == "No solution":
+                print("Online solution: No solution")
+            else:
+                print("Online solution depth: " + str(lines[0]).rstrip('\n'))
+                print("Online solution time taken: " + str(lines[1]) + " seconds")
+    except FileNotFoundError:
+        print("No expected output")
