@@ -3,8 +3,7 @@ import sys
 import heapq
 from Node_mod import Node
 from Util import execute_move, state_to_tuple, opposite_move_dict, \
-    check_solvable, heuristic_distance_increase, check_valid, get_possible_moves, \
-    online_solution_check
+    check_solvable, heuristic_distance_increase, check_valid, get_possible_moves
 import time
 
 
@@ -34,8 +33,6 @@ class Puzzle(object):
         print("States searched: ", self.searched_state_count)
         print("Times heuristic increase executed: ", self.heuristic_execution_count)
         print("States stored: ", len(self.explored_states))
-
-        online_solution_check(sys.argv[1])
 
         return [e.value for e in result]
 
