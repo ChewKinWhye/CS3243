@@ -2,7 +2,6 @@ import os
 import sys
 import heapq
 import time
-from enum import Enum
 from copy import deepcopy
 
 class Puzzle(object):
@@ -23,17 +22,12 @@ class Puzzle(object):
 
     ################################ HELPER METHODS ################################
 
+    MoveDirection = {"UP", "DOWN", "LEFT", "RIGHT"}
 
-    class MoveDirection(Enum):
-        UP = "UP"  # 0
-        DOWN = "DOWN"  # 1
-        LEFT = "LEFT"  # 2
-        RIGHT = "RIGHT"  # 3
-
-    opposite_move_dict = {MoveDirection.UP: MoveDirection.DOWN,
-                          MoveDirection.DOWN: MoveDirection.UP,
-                          MoveDirection.RIGHT: MoveDirection.LEFT,
-                          MoveDirection.LEFT: MoveDirection.RIGHT}
+    opposite_move_dict = {"UP": "DOWN",
+                          "DOWN": "UP",
+                          "RIGHT": "LEFT",
+                          "LEFT": "RIGHT"}
 
     class Node:
         @classmethod
@@ -55,7 +49,7 @@ class Puzzle(object):
 
     # https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
     # https://math.stackexchange.com/questions/293527/how-to-check-if-a-8-puzzle-is-solvable
-    def check_solvable(state):
+    def check_solvable(self, state):
         n = len(state)
         inversions = 0
         inversion_is_odd = 0
@@ -63,7 +57,7 @@ class Puzzle(object):
             blank_row, blank_y = get__position_of_number(state, 0)
             if blank_row % 2 == 0:
                 inversion_is_odd = 1
-        flat_state = state_to_tuple(state)
+        flat_state = self.state_to_tuple(state)
         for i, val_i in enumerate(flat_state):
             for j in range(i + 1, len(flat_state)):
                 if flat_state[j] == 0:
@@ -72,7 +66,7 @@ class Puzzle(object):
                     inversions += 1
         return inversions % 2 == inversion_is_odd
 
-    def state_to_tuple(state):
+    def state_to_tuple(self, state):
         arr = []
         for row in state:
             for val in row:
@@ -80,7 +74,7 @@ class Puzzle(object):
         return tuple(arr)
 
 
-    def heuristic_distance(state, goal_state):
+    def heuristic_distance(self, state, goal_state):
         distance = 0
         n = len(state)
         state_size = pow(len(state), 2)
@@ -107,7 +101,7 @@ class Puzzle(object):
         return distance
 
     # Copied https://github.com/Masum95/N-puzzle-solve-using-A-star-search-algorithm/blob/master/State.py
-    def linear_conflict_row(state, row):
+    def linear_conflict_row(self, state, row):
         n = len(state)
         found_goals = []
         for col in range(n):
@@ -125,7 +119,7 @@ class Puzzle(object):
         return 0
 
 
-    def linear_conflict_col(state, col):
+    def linear_conflict_col(self, state, col):
         n = len(state)
         found_goals = []
         for row in range(n):
@@ -143,7 +137,7 @@ class Puzzle(object):
         return 0
 
 
-    def get__position_of_number(state, number):
+    def get__position_of_number(self, state, number):
         for i, row in enumerate(state):
             for ii, value in enumerate(row):
                 if value == number:
@@ -152,7 +146,7 @@ class Puzzle(object):
     last_n_checked_by_get_goal_position = 0
     goal_position_map = []
 
-    def get_goal_position(number, n):
+    def get_goal_position(self, number, n):
         # return divmod(number - 1, n)
         global goal_position_map
         global last_n_checked_by_get_goal_position
@@ -163,51 +157,51 @@ class Puzzle(object):
             last_n_checked_by_get_goal_position = n
         return goal_position_map[number]
 
-    def get_possible_moves(state):
+    def get_possible_moves(self, state):
         x, y = get__position_of_number(state, 0)
         puzzle_size = len(state)
         moves = []
         if x != 0:
-            moves.append(MoveDirection.DOWN)
+            moves.append("DOWN")
         if x + 1 != puzzle_size:
-            moves.append(MoveDirection.UP)
+            moves.append("UP")
         if y != 0:
-            moves.append(MoveDirection.RIGHT)
+            moves.append("RIGHT")
         if y + 1 != puzzle_size:
-            moves.append(MoveDirection.LEFT)
+            moves.append("LEFT")
         return moves
 
 
     # This function takes in the current state and returns the new state
     # after the move has been executed
-    def execute_move(curr_state, move):
+    def execute_move(self, curr_state, move):
         x, y = get__position_of_number(curr_state, 0)
         new_state = deepcopy(curr_state)
-        if move == MoveDirection.UP:
+        if move == "UP":
             new_state[x][y] = new_state[x + 1][y]
             new_state[x + 1][y] = 0
-        elif move == MoveDirection.DOWN:
+        elif move == "DOWN":
             new_state[x][y] = new_state[x - 1][y]
             new_state[x - 1][y] = 0
-        elif move == MoveDirection.LEFT:
+        elif move == "LEFT":
             new_state[x][y] = new_state[x][y + 1]
             new_state[x][y + 1] = 0
-        elif move == MoveDirection.RIGHT:
+        elif move == "RIGHT":
             new_state[x][y] = new_state[x][y - 1]
             new_state[x][y - 1] = 0
         return new_state
 
-    def heuristic_distance_increase(state, next_state, move):
+    def heuristic_distance_increase(self, state, next_state, move):
         n = len(state)
         b_x, b_y = get__position_of_number(state, 0)
         curr_x, curr_y = (-1, -1)
-        if move == MoveDirection.UP:
+        if move == "UP":
             curr_x, curr_y = (b_x + 1, b_y)
-        elif move == MoveDirection.DOWN:
+        elif move == "DOWN":
             curr_x, curr_y = (b_x - 1, b_y)
-        elif move == MoveDirection.LEFT:
+        elif move == "LEFT":
             curr_x, curr_y = (b_x, b_y + 1)
-        elif move == MoveDirection.RIGHT:
+        elif move == "RIGHT":
             curr_x, curr_y = (b_x, b_y - 1)
         next_value = state[curr_x][curr_y]
         g_x, g_y = get_goal_position(next_value, n)
@@ -219,7 +213,7 @@ class Puzzle(object):
         curr_cost += abs(curr_x - g_x) + abs(curr_y - g_y)
 
         # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
-        if move == MoveDirection.UP or move == MoveDirection.DOWN:
+        if move == "UP" or move == "DOWN":
             if curr_x == g_x:
                 next_cost_blank_row = linear_conflict_row(next_state, curr_x)
                 if next_cost_blank_row == 0:
@@ -253,7 +247,7 @@ class Puzzle(object):
 
     # This function takes in the initial state and the set of moves
     # and verifies that the moves would reach the goal state
-    def check_valid(init_state, goal_state, moves):
+    def check_valid(self, init_state, goal_state, moves):
         for move in moves:
             init_state = execute_move(init_state, move)
         return init_state == goal_state
@@ -272,9 +266,9 @@ class Puzzle(object):
         return [e.value for e in result]
 
     def solve(self):
-        if not check_solvable(self.init_state):
+        if not self.check_solvable(self.init_state):
             return ["UNSOLVABLE"]
-        Node.set_goal_state(self.goal_state)
+        self.Node.set_goal_state(self.goal_state)
         initial_node = Node(self.init_state, moves=())
         frontier = [initial_node]
         explored_states = self.explored_states
