@@ -10,6 +10,7 @@ class Puzzle(object):
         # you may add more attributes if you think is useful
         self.init_state = init_state
         self.goal_state = goal_state
+        self.searched_state_count = 0
         self.actions = list()
         self.total_states_stored = 0
         self.start_time = time.time()
@@ -154,10 +155,13 @@ class Puzzle(object):
         opp_result.reverse()
         result.extend(opp_result)
 
+        print("Solution found at depth: ", len(result))
         print("Is valid?", Puzzle.check_valid(self.init_state, self.goal_state, result))
         print("Total states stored: ", self.total_states_stored)
 
-        print("Time taken: ", elapsed_time, " seconds")
+        print("Time taken: ", elapsed_time , " seconds")
+
+        print("States searched: ", self.searched_state_count)
 
         return [Puzzle.moveDirectionValue[e] for e in result]
 
@@ -177,9 +181,9 @@ class Puzzle(object):
         cur_depth = 0
         while True:
             cur_depth += 1
-            print("next_visited final size: ", len(next_visited), " opp_: ", len(opp_next_visited))
+            # print("next_visited final size: ", len(next_visited), " opp_: ", len(opp_next_visited))
             self.total_states_stored += len(next_visited) + len(opp_next_visited)
-            print("Current depth is: " + str(cur_depth))
+            # print("Current depth is: " + str(cur_depth))
             cur_visited = next_visited
             next_visited = {}
             frontier = next_frontier
@@ -201,6 +205,8 @@ class Puzzle(object):
                         continue
                     if next_state_tup in next_visited:
                         continue
+
+                    self.searched_state_count += 1
 
                     next_move_node = self.MoveNode(move, cur_move_node)
                     next_visited[next_state_tup] = next_move_node
@@ -227,6 +233,7 @@ class Puzzle(object):
                         continue
                     if next_state_tup in opp_next_visited:
                         continue
+                    self.searched_state_count += 1
 
                     next_move_node = self.MoveNode(Puzzle.opposite_move_dict[move], cur_move_node)
 

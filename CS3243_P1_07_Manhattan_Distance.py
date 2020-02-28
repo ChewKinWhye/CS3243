@@ -300,11 +300,11 @@ class Puzzle(object):
             for move in moves:
                 next_state = Puzzle.execute_move(curr_node.state, move)
                 next_state_tup = Puzzle.state_to_tuple(next_state)
-                self.searched_state_count += 1
 
                 # For consistent heuristic
                 if next_state_tup in explored_states:
                     continue
+                self.searched_state_count += 1
 
                 # For not consistent heuristic
                 # next_found_dist = explored_states.get(next_state_tup)
