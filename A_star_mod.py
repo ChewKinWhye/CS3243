@@ -25,17 +25,15 @@ class Puzzle(object):
         # self.explored_states = {}
 
     def process_solution(self, result):
+        elapsed_time = time.time() - self.start_time
         print("Solution found at depth: ", len(result))
         print("Is solution valid? ", check_valid(self.init_state, self.goal_state, result))
 
-        elapsed_time = time.time() - self.start_time
         print("Time taken: ", elapsed_time, " seconds")
 
         print("States searched: ", self.searched_state_count)
         print("Times heuristic increase executed: ", self.heuristic_execution_count)
         print("States stored: ", len(self.explored_states))
-
-        online_solution_check(sys.argv[1])
 
         return [e.value for e in result]
 
