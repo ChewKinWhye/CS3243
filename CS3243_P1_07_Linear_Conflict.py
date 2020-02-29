@@ -107,35 +107,32 @@ class Puzzle(object):
 
     # Copied https://github.com/Masum95/N-puzzle-solve-using-A-star-search-algorithm/blob/master/State.py
     def linear_conflict_row(self, state, row):
-        found_goals = []
-        for col in range(len(state)):
-            found_square = state[row][col]
+        last_smallest = 0
+        for found_square in state[row]:
             if found_square == 0:
                 continue
             goal_pos = self.get_goal_position(found_square)
             if goal_pos[0] == row:
-                found_goals.append(goal_pos[1])
-
-        for i in range(1, len(found_goals)):
-            # Should be strictly increasing.
-            if found_goals[i] < found_goals[i - 1]:
-                return 2
+                if goal_pos[1] < last_smallest:
+                    return 2
+                else:
+                    last_smallest = goal_pos[1]
         return 0
 
     def linear_conflict_col(self, state, col):
-        found_goals = []
+        last_smallest = 0
         for row in range(len(state)):
             found_square = state[row][col]
             if found_square == 0:
                 continue
             goal_pos = self.get_goal_position(found_square)
-            if goal_pos[1] == col:
-                found_goals.append(goal_pos[0])
-
-        for i in range(1, len(found_goals)):
             # Should be strictly increasing.
-            if found_goals[i] < found_goals[i - 1]:
-                return 2
+            if goal_pos[1] == col:
+                if goal_pos[0] < last_smallest:
+                    return 2
+                else:
+                    last_smallest = goal_pos[0]
+
         return 0
 
     @staticmethod
@@ -317,7 +314,7 @@ class Puzzle(object):
                 self.heuristic_execution_count += 1
                 # For checking consistency
                 # if cur_h_n > next_h_n + 1:
-                #     print("not consistent! ", heuristic_distance_increase(curr_node.state, next_state, move))
+                #     print("not consistent! ", self.heuristic_distance_increase(curr_node.state, next_state, move))
                 new_node = Puzzle.Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
