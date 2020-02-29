@@ -73,15 +73,6 @@ def run_test_cases():
     print("Column 3: Total states searched")
     print("Column 4: Time taken")
     for search_algorithm in range(4):
-        if search_algorithm == 0:
-            print("Testing BFS")
-        elif search_algorithm == 1:
-            print("Testing Linear_Conflict")
-        elif search_algorithm == 2:
-            print("Testing Manhattan_Distance")
-        elif search_algorithm == 3:
-            print("Testing Misplaced_Tiles")
-
         for n in range(3, 6):
             experiment_results_n = []
             for i in range(num_test_cases):
@@ -137,6 +128,14 @@ def run_test_cases():
                 result = experiment_results_n[i]
                 if len(result) == 1:
                     experiment_results_n.pop(i)
+            if search_algorithm == 0:
+                print("Testing BFS, N = ", n)
+            elif search_algorithm == 1:
+                print("Testing Linear_Conflict, N =", n)
+            elif search_algorithm == 2:
+                print("Testing Manhattan_Distance, N =", n)
+            elif search_algorithm == 3:
+                print("Testing Misplaced_Tiles, N =", n)
             print(experiment_results_n)
             # experiment_results_n = np.asarray(experiment_results_n).T
             # plt.plot(experiment_results_n[0], experiment_results_n[1])
