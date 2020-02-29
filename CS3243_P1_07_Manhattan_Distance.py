@@ -90,53 +90,7 @@ class Puzzle(object):
             # heuristic 1 admissible and consistent(manhattan dist)
             distance += abs(x1 - x2) + abs(y1 - y2)
 
-            # heuristic 2 admissible and consistent (misplaced squares)
-            # if x1 != x2 or y1 != y2:
-            #     distance += 1
-
-            # heuristic 3 not admissible (squared dist)
-            # distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
-
-        # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
-        for row in range(n):
-            distance += self.linear_conflict_row(state, row)
-        for col in range(n):
-            distance += self.linear_conflict_col(state, col)
-
         return distance
-
-    # Copied https://github.com/Masum95/N-puzzle-solve-using-A-star-search-algorithm/blob/master/State.py
-    def linear_conflict_row(self, state, row):
-        found_goals = []
-        for col in range(len(state)):
-            found_square = state[row][col]
-            if found_square == 0:
-                continue
-            goal_pos = self.get_goal_position(found_square)
-            if goal_pos[0] == row:
-                found_goals.append(goal_pos[1])
-
-        for i in range(1, len(found_goals)):
-            # Should be strictly increasing.
-            if found_goals[i] < found_goals[i - 1]:
-                return 2
-        return 0
-
-    def linear_conflict_col(self, state, col):
-        found_goals = []
-        for row in range(len(state)):
-            found_square = state[row][col]
-            if found_square == 0:
-                continue
-            goal_pos = self.get_goal_position(found_square)
-            if goal_pos[1] == col:
-                found_goals.append(goal_pos[0])
-
-        for i in range(1, len(found_goals)):
-            # Should be strictly increasing.
-            if found_goals[i] < found_goals[i - 1]:
-                return 2
-        return 0
 
     @staticmethod
     def get_position_of_number(state, number):
@@ -206,38 +160,6 @@ class Puzzle(object):
         # heuristic 1 admissible (manhattan dist)
         next_cost += abs(b_x - g_x) + abs(b_y - g_y)
         curr_cost += abs(curr_x - g_x) + abs(curr_y - g_y)
-
-        # # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
-        # if move == MoveDirection.UP or move == MoveDirection.DOWN:
-        #     linear_conflict_row = self.linear_conflict_row
-        #     if curr_x == g_x:
-        #         next_cost_blank_row = linear_conflict_row(next_state, curr_x)
-        #         if next_cost_blank_row == 0:
-        #             curr_cost += linear_conflict_row(state, curr_x)
-        #     if b_x == g_x:
-        #         curr_cost_blank_row = linear_conflict_row(state, b_x)
-        #         if curr_cost_blank_row == 0:
-        #             next_cost += linear_conflict_row(next_state, b_x)
-        # else:
-        #     linear_conflict_col = self.linear_conflict_col
-        #     if curr_y == g_y:
-        #         next_cost_blank_col = linear_conflict_col(next_state, curr_y)
-        #         if next_cost_blank_col == 0:
-        #             curr_cost += linear_conflict_col(state, curr_y)
-        #     if b_y == g_y:
-        #         curr_cost_blank_col = linear_conflict_col(state, b_y)
-        #         if curr_cost_blank_col == 0:
-        #             next_cost += linear_conflict_col(next_state, b_y)
-
-                    # heuristic 2 admissible (misplaced squares)
-        # if curr_x != g_x or curr_y != g_y:
-        #     curr_cost += 1
-        # if b_x != g_x and b_y != g_y:
-        #     next_cost += 1
-
-        # heuristic 3 not admissible (squared dist)
-        # next_cost += pow(b_x - g_x, 2) + pow(b_y - g_y, 2)
-        # curr_cost += pow(curr_x - g_x, 2) + pow(curr_y - g_y, 2)
 
         return next_cost - curr_cost
 
@@ -315,14 +237,14 @@ class Puzzle(object):
                 next_h_n = cur_h_n + self.heuristic_distance_increase(curr_node.state, next_state, move)
                 self.heuristic_execution_count += 1
                 # For checking consistency
-                # if cur_h_n > next_h_n + 1:
-                #     print("not consistent! ", heuristic_distance_increase(curr_node.state, next_state, move))
+                if cur_h_n > next_h_n + 1:
+                    print("not consistent! ", self.heuristic_distance_increase(curr_node.state, next_state, move))
                 new_node = Puzzle.Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
 
 
-# python CS3243_P1_07_Linear_Conflict.py n_equals_4/input_3.txt test.txt
+# python CS3243_P1_07_Manhattan_Distance.py n_equals_4/input_3.txt test.txt
 if __name__ == "__main__":
     # do NOT modify below
 
