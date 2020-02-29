@@ -88,55 +88,22 @@ class Puzzle(object):
             x2, y2 = self.get_goal_position(i)
 
             # heuristic 1 admissible and consistent(manhattan dist)
-            distance += abs(x1 - x2) + abs(y1 - y2)
+            # distance += abs(x1 - x2) + abs(y1 - y2)
 
             # heuristic 2 admissible and consistent (misplaced squares)
-            # if x1 != x2 or y1 != y2:
-            #     distance += 1
+            if x1 != x2 or y1 != y2:
+                distance += 1
 
             # heuristic 3 not admissible (squared dist)
             # distance += pow(x1 - x2, 2) + pow(y1 - y2, 2)
 
         # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
-        for row in range(n):
-            distance += self.linear_conflict_row(state, row)
-        for col in range(n):
-            distance += self.linear_conflict_col(state, col)
+        # for row in range(n):
+        #     distance += self.linear_conflict_row(state, row)
+        # for col in range(n):
+        #     distance += self.linear_conflict_col(state, col)
 
         return distance
-
-    # Copied https://github.com/Masum95/N-puzzle-solve-using-A-star-search-algorithm/blob/master/State.py
-    def linear_conflict_row(self, state, row):
-        found_goals = []
-        for col in range(len(state)):
-            found_square = state[row][col]
-            if found_square == 0:
-                continue
-            goal_pos = self.get_goal_position(found_square)
-            if goal_pos[0] == row:
-                found_goals.append(goal_pos[1])
-
-        for i in range(1, len(found_goals)):
-            # Should be strictly increasing.
-            if found_goals[i] < found_goals[i - 1]:
-                return 2
-        return 0
-
-    def linear_conflict_col(self, state, col):
-        found_goals = []
-        for row in range(len(state)):
-            found_square = state[row][col]
-            if found_square == 0:
-                continue
-            goal_pos = self.get_goal_position(found_square)
-            if goal_pos[1] == col:
-                found_goals.append(goal_pos[0])
-
-        for i in range(1, len(found_goals)):
-            # Should be strictly increasing.
-            if found_goals[i] < found_goals[i - 1]:
-                return 2
-        return 0
 
     @staticmethod
     def get_position_of_number(state, number):
@@ -316,13 +283,13 @@ class Puzzle(object):
                 self.heuristic_execution_count += 1
                 # For checking consistency
                 # if cur_h_n > next_h_n + 1:
-                #     print("not consistent! ", heuristic_distance_increase(curr_node.state, next_state, move))
+                #     print("not consistent! ", self.heuristic_distance_increase(curr_node.state, next_state, move))
                 new_node = Puzzle.Node(next_state, new_moves, next_h_n)
                 heapq.heappush(frontier, new_node)
         return ["UNSOLVABLE"]
 
 
-# python CS3243_P1_07_Linear_Conflict.py n_equals_4/input_3.txt test.txt
+# python CS3243_P1_07_Misplaced_Tiles.py n_equals_3/input_3.txt test.txt
 if __name__ == "__main__":
     # do NOT modify below
 
