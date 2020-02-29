@@ -91,7 +91,7 @@ class Puzzle(object):
             # distance += abs(x1 - x2) + abs(y1 - y2)
 
             # heuristic 2 admissible and consistent (misplaced squares)
-            if x1 != x2 or y1 != y2:
+            if x1 != x2 and y1 != y2:
                 distance += 1
 
             # heuristic 3 not admissible (squared dist)
