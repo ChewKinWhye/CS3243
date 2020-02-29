@@ -200,7 +200,9 @@ class Puzzle(object):
         print("States searched: ", self.searched_state_count)
         print("Times heuristic increase executed: ", self.heuristic_execution_count)
         print("States stored: ", len(self.explored_states))
-
+        self.results.append(int(len(result)))
+        self.results.append(int(self.total_states_stored))
+        self.results.append(int(self.searched_state_count))
         return [Puzzle.moveDirectionValue[e] for e in result]
 
     def solve(self):

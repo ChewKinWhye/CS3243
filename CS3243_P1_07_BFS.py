@@ -14,7 +14,7 @@ class Puzzle(object):
         self.actions = list()
         self.total_states_stored = 0
         self.start_time = time.time()
-
+        self.results = []
         n = len(init_state)
         self.goal_position_map = [0]
         for i in range(1, n * n):
@@ -155,14 +155,14 @@ class Puzzle(object):
         opp_result.reverse()
         result.extend(opp_result)
 
-        print("Solution found at depth: ", len(result))
-        print("Is valid?", Puzzle.check_valid(self.init_state, self.goal_state, result))
-        print("Total states stored: ", self.total_states_stored)
-
-        print("Time taken: ", elapsed_time , " seconds")
-
-        print("States searched: ", self.searched_state_count)
-
+        # print("Solution found at depth: ", len(result))
+        # print("Is valid?", Puzzle.check_valid(self.init_state, self.goal_state, result))
+        # print("Total states stored: ", self.total_states_stored)
+        # print("Time taken: ", elapsed_time , " seconds")
+        # print("States searched: ", self.searched_state_count)
+        self.results.append(int(len(result)))
+        self.results.append(int(self.total_states_stored))
+        self.results.append(int(self.searched_state_count))
         return [Puzzle.moveDirectionValue[e] for e in result]
 
     def solve(self):
@@ -181,9 +181,9 @@ class Puzzle(object):
         cur_depth = 0
         while True:
             cur_depth += 1
-            print("next_visited final size: ", len(next_visited), " opp_: ", len(opp_next_visited))
+            # print("next_visited final size: ", len(next_visited), " opp_: ", len(opp_next_visited))
             self.total_states_stored += len(next_visited) + len(opp_next_visited)
-            print("Current depth is: " + str(cur_depth))
+            # print("Current depth is: " + str(cur_depth))
             cur_visited = next_visited
             next_visited = {}
             frontier = next_frontier
