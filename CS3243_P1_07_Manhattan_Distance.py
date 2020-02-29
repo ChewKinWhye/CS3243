@@ -193,11 +193,16 @@ class Puzzle(object):
                                  h_n=self.heuristic_distance(self.init_state, self.goal_state))
         frontier = [initial_node]
         explored_states = self.explored_states
+        smallest_fn = 0
 
         while len(frontier) != 0:
             curr_node = heapq.heappop(frontier)
             curr_dist = curr_node.g_n
             state_tup = Puzzle.state_to_tuple(curr_node.state)
+            if curr_node.f_n > smallest_fn:
+                smallest_fn = curr_node.f_n
+                print("Current estimated depth (f_n) is:", smallest_fn,
+                      " at time:", time.time() - self.start_time)
 
             # For not consistent heuristic
             # found_dist = explored_states.get(state_tup)

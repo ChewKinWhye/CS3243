@@ -247,7 +247,7 @@ class Puzzle(object):
                     opp_next_visited.add(next_state_tup)
                     opp_next_frontier.append((next_state_tup, next_move_node))
 
-# python Bfs_search_bidirectional.py n_equals_3/input_2.txt test.txt
+# python CS3243_P1_07_Bfs.py n_equals_3/input_2.txt test.txt
 if __name__ == "__main__":
     # do NOT modify below
 
