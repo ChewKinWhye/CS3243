@@ -170,34 +170,8 @@ class Puzzle(object):
         next_cost = 0
         curr_cost = 0
 
-        # heuristic 1 admissible (manhattan dist)
-        # next_cost += abs(b_x - g_x) + abs(b_y - g_y)
-        # curr_cost += abs(curr_x - g_x) + abs(curr_y - g_y)
-
-        # heuristic 1.5 admissible and consistent(linear conflict) when added with manhattan dist
-        # if move == MoveDirection.UP or move == MoveDirection.DOWN:
-        #     linear_conflict_row = self.linear_conflict_row
-        #     if curr_x == g_x:
-        #         next_cost_blank_row = linear_conflict_row(next_state, curr_x)
-        #         if next_cost_blank_row == 0:
-        #             curr_cost += linear_conflict_row(state, curr_x)
-        #     if b_x == g_x:
-        #         curr_cost_blank_row = linear_conflict_row(state, b_x)
-        #         if curr_cost_blank_row == 0:
-        #             next_cost += linear_conflict_row(next_state, b_x)
-        # else:
-        #     linear_conflict_col = self.linear_conflict_col
-        #     if curr_y == g_y:
-        #         next_cost_blank_col = linear_conflict_col(next_state, curr_y)
-        #         if next_cost_blank_col == 0:
-        #             curr_cost += linear_conflict_col(state, curr_y)
-        #     if b_y == g_y:
-        #         curr_cost_blank_col = linear_conflict_col(state, b_y)
-        #         if curr_cost_blank_col == 0:
-        #             next_cost += linear_conflict_col(next_state, b_y)
-
         # heuristic 2 admissible (misplaced squares)
-        if curr_x != g_x or curr_y != g_y:
+        if curr_x != g_x and curr_y != g_y:
             curr_cost += 1
         if b_x != g_x and b_y != g_y:
             next_cost += 1
