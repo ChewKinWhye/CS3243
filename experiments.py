@@ -50,6 +50,7 @@ def plot_results():
 def create_test_cases():
     for n in range(3, 6):
         dirName = "n_equals_" + str(n) + "_test"
+        dirName = os.path.join("experiment_data", dirName)
         input = a = np.arange(n * n)
         if not os.path.exists(dirName):
             os.mkdir(dirName)
@@ -88,6 +89,7 @@ def run_test_cases():
                 # print("N = ", n)
                 # print("Test case = ", str(i+1))
                 dirName = "n_equals_" + str(n) + "_test"
+                dirName = os.path.join("experiment_data", dirName)
                 txt_name = "test_" + str(i + 1) + ".txt"
                 load_name = os.path.join(dirName, txt_name)
                 try:
