@@ -68,14 +68,17 @@ def create_test_cases():
 
 
 def run_test_cases():
-    print("Column 1: Depth of solution")
-    print("Column 2: Total states stored")
-    print("Column 3: Total states searched")
-    print("Column 4: Time taken")
+    with open("experiment_results.txt", "a") as output_txt:
+        output_txt.write("Column 1: Depth of solution\n")
+        output_txt.write("Column 2: Total states stored\n")
+        output_txt.write("Column 3: Total states searched\n")
+        output_txt.write("Column 4: Time taken\n")
     for search_algorithm in range(4):
         for n in range(3, 6):
+            print("N", n)
             experiment_results_n = []
             for i in range(num_test_cases):
+                print("Test case", i)
                 single_experiment_result = []
                 # print("N = ", n)
                 # print("Test case = ", str(i+1))
@@ -108,17 +111,16 @@ def run_test_cases():
                     goal_state[(i - 1) // n][(i - 1) % n] = i
                 goal_state[n - 1][n - 1] = 0
                 if search_algorithm == 0:
-                    puzzle = CS3243_P1_07_BFS.Puzzle(init_state, goal_state)
-                elif search_algorithm == 1:
                     puzzle = CS3243_P1_07_Linear_Conflict.Puzzle(init_state, goal_state)
-                elif search_algorithm == 2:
+                elif search_algorithm == 1:
                     puzzle = CS3243_P1_07_Manhattan_Distance.Puzzle(init_state, goal_state)
+                elif search_algorithm == 2:
+                    puzzle = CS3243_P1_07_BFS.Puzzle(init_state, goal_state)
                 elif search_algorithm == 3:
                     puzzle = CS3243_P1_07_Misplaced_Tiles.Puzzle(init_state, goal_state)
                 start_time = time.time()
                 results = puzzle.solve()
                 elapsed_time = time.time() - start_time
-                # print("Time taken: " + str(elapsed_time) + " seconds")
                 single_experiment_result.extend(puzzle.results)
                 single_experiment_result.append(elapsed_time)
                 experiment_results_n.append(single_experiment_result)
@@ -128,15 +130,17 @@ def run_test_cases():
                 result = experiment_results_n[i]
                 if len(result) == 1:
                     experiment_results_n.pop(i)
-            if search_algorithm == 0:
-                print("Testing BFS, N = ", n)
-            elif search_algorithm == 1:
-                print("Testing Linear_Conflict, N =", n)
-            elif search_algorithm == 2:
-                print("Testing Manhattan_Distance, N =", n)
-            elif search_algorithm == 3:
-                print("Testing Misplaced_Tiles, N =", n)
-            print(experiment_results_n)
+            with open("experiment_results.txt", "a") as output_txt:
+                if search_algorithm == 0:
+                    output_txt.write("Testing Linear_Conflict, N = " + str(n) + "\n")
+                elif search_algorithm == 1:
+                    output_txt.write("Testing Manhattan_Distance, N = " + str(n) + "\n")
+                elif search_algorithm == 2:
+                    output_txt.write("Testing BFS, N = " + str(n) + "\n")
+                elif search_algorithm == 3:
+                    output_txt.write("Testing Misplaced_Tiles, N = ", str(n) + "\n")
+            with open("experiment_results.txt", "a") as output_txt:
+                output_txt.write(str(experiment_results_n) + "\n")
             # experiment_results_n = np.asarray(experiment_results_n).T
             # plt.plot(experiment_results_n[0], experiment_results_n[1])
             # plt.show()

@@ -20,7 +20,7 @@ class Puzzle(object):
 
         # For not consistent heuristic
         # self.explored_states = {}
-
+        self.results
         n = len(init_state)
         self.goal_position_map = [0]
         for i in range(1, n * n):

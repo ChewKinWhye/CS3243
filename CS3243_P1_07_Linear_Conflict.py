@@ -17,7 +17,7 @@ class Puzzle(object):
 
         # For consistent heuristic
         self.explored_states = set()
-
+        self.results = []
         # For not consistent heuristic
         # self.explored_states = {}
 
@@ -248,16 +248,16 @@ class Puzzle(object):
 
     def process_solution(self, result):
         elapsed_time = time.time() - self.start_time
-        print("Solution found at depth: ", len(result))
-        print("Is solution valid? ", Puzzle.check_valid(self.init_state, self.goal_state, result))
-
-        print("Time taken: ", elapsed_time, " seconds")
-
-        print("States searched: ", self.searched_state_count)
-        print("Times heuristic increase executed: ", self.heuristic_execution_count)
-        print("States stored: ", len(self.explored_states))
+        # print("Solution found at depth: ", len(result))
+        # print("Is solution valid? ", Puzzle.check_valid(self.init_state, self.goal_state, result))
+        #
+        # print("Time taken: ", elapsed_time, " seconds")
+        #
+        # print("States searched: ", self.searched_state_count)
+        # print("Times heuristic increase executed: ", self.heuristic_execution_count)
+        # print("States stored: ", len(self.explored_states))
         self.results.append(int(len(result)))
-        self.results.append(int(self.total_states_stored))
+        self.results.append(int(len(self.explored_states)))
         self.results.append(int(self.searched_state_count))
         return [Puzzle.moveDirectionValue[e] for e in result]
 
@@ -278,8 +278,8 @@ class Puzzle(object):
             state_tup = Puzzle.state_to_tuple(curr_node.state)
             if curr_node.f_n > smallest_fn:
                 smallest_fn = curr_node.f_n
-                print("Current estimated depth (f_n) is:", smallest_fn,
-                      " at time:", time.time() - self.start_time)
+                # print("Current estimated depth (f_n) is:", smallest_fn,
+                #       " at time:", time.time() - self.start_time)
 
             # For not consistent heuristic
             # found_dist = explored_states.get(state_tup)

@@ -17,7 +17,7 @@ class Puzzle(object):
 
         # For consistent heuristic
         self.explored_states = set()
-
+        self.results
         # For not consistent heuristic
         # self.explored_states = {}
 
