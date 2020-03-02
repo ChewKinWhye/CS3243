@@ -20,7 +20,7 @@ class Puzzle(object):
 
         # For not consistent heuristic
         # self.explored_states = {}
-        self.results
+        self.results = []
         n = len(init_state)
         self.goal_position_map = [0]
         for i in range(1, n * n):
@@ -182,8 +182,8 @@ class Puzzle(object):
         print("Times heuristic increase executed: ", self.heuristic_execution_count)
         print("States stored: ", len(self.explored_states))
         self.results.append(int(len(result)))
-        self.results.append(int(self.total_states_stored))
-        self.results.append(int(self.searched_state_count))
+        self.results.append((len(self.explored_states)))
+        self.results.append(self.searched_state_count)
         return [Puzzle.moveDirectionValue[e] for e in result]
 
     def solve(self):
@@ -203,8 +203,8 @@ class Puzzle(object):
             state_tup = Puzzle.state_to_tuple(curr_node.state)
             if curr_node.f_n > smallest_fn:
                 smallest_fn = curr_node.f_n
-                print("Current estimated depth (f_n) is:", smallest_fn,
-                      " at time:", time.time() - self.start_time)
+                # print("Current estimated depth (f_n) is:", smallest_fn,
+                #       " at time:", time.time() - self.start_time)
 
             # For not consistent heuristic
             # found_dist = explored_states.get(state_tup)
